@@ -13,6 +13,25 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  async function signInWithGoogle() {
+    setLoading(true);
+    setMessage("");
+    try {
+      if (!supabase) throw new Error("Supabase n'est pas encore configuré pour cet environnement.");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { access_type: "offline", prompt: "consent" },
+        },
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Impossible de démarrer Google.");
+      setLoading(false);
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
@@ -37,8 +56,6 @@ export default function AuthPage() {
       });
       if (error) throw error;
 
-      // The database trigger creates the organization from company_name.
-      // This also works when Supabase requires email confirmation and no session exists yet.
       if (!data.session) {
         setMessage("Compte créé. Vérifie ton email pour confirmer ton adresse, puis connecte-toi.");
       } else {
@@ -61,6 +78,12 @@ export default function AuthPage() {
         <h1>{mode === "signin" ? "Your business, in motion." : "Start your orbit."}</h1>
         <p className="auth-copy">{mode === "signin" ? "Sign in to see what ORBIT is doing for your business." : "Create your workspace and start connecting the work between your tools."}</p>
 
+        <button className="google-submit" type="button" onClick={signInWithGoogle} disabled={loading}>
+          <span className="google-mark">G</span>
+          {loading ? "Connecting…" : "Continue with Google"}
+        </button>
+        <div className="auth-divider"><span>or</span></div>
+
         <form onSubmit={submit} className="auth-form">
           {mode === "signup" && <label>COMPANY<input required value={company} onChange={e => setCompany(e.target.value)} placeholder="Your company" /></label>}
           <label>EMAIL<input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" /></label>
@@ -79,7 +102,7 @@ export default function AuthPage() {
         .auth-page:before{content:"";position:absolute;width:700px;height:700px;border:1px solid rgba(0,0,0,.045);border-radius:50%;top:-420px;left:50%;transform:translateX(-50%);box-shadow:0 0 0 70px rgba(255,255,255,.35),0 0 0 140px rgba(255,255,255,.2)}
         .auth-card{width:min(440px,100%);padding:38px;border:1px solid rgba(0,0,0,.08);border-radius:24px;background:rgba(255,255,255,.82);backdrop-filter:blur(30px);box-shadow:0 35px 100px rgba(0,0,0,.08),inset 0 1px 0 #fff;position:relative;z-index:1}
         .auth-orbit-mark{position:absolute;top:8%;width:34px;height:34px;border:1px solid #d7d7d5;border-radius:50%;opacity:.8}.auth-orbit-mark:before,.auth-orbit-mark:after{content:"";position:absolute;inset:7px;border:1px solid #ddd;border-radius:50%;transform:rotate(55deg)}.auth-orbit-mark:after{transform:rotate(-55deg)}.auth-orbit-mark span{position:absolute;width:6px;height:6px;background:#111;border-radius:50%;top:14px;left:14px}
-        .auth-brand{font-size:14px;font-weight:700;letter-spacing:.08em;margin-bottom:34px}.auth-card .eyebrow{margin-bottom:8px}.auth-card h1{margin:0;font-size:30px;line-height:1.08;letter-spacing:-.045em;font-weight:600}.auth-copy{margin:11px 0 28px;color:#929290;font-size:11px;line-height:1.6}.auth-form{display:grid;gap:16px}.auth-form label{font-size:8px;color:#aaa;letter-spacing:.12em;font-weight:700}.auth-form input{display:block;width:100%;height:46px;margin-top:7px;padding:0 13px;border:1px solid #e1e1df;border-radius:11px;background:rgba(255,255,255,.85);font:inherit;font-size:11px;letter-spacing:normal;outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.015)}.auth-form input:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.035)}.auth-submit{height:46px;margin-top:4px;border:1px solid #111;border-radius:11px;background:#111;color:#fff;font-size:10px;font-weight:600;cursor:pointer;box-shadow:0 12px 25px rgba(0,0,0,.13)}.auth-submit:disabled{opacity:.55;cursor:wait}.auth-message{margin:15px 0 0;padding:11px 12px;border:1px solid #e4e4e2;border-radius:10px;background:#fafafa;color:#666;font-size:9px;line-height:1.5}.auth-switch{width:100%;border:0;background:transparent;margin-top:20px;color:#777;font-size:9px;cursor:pointer}.auth-switch:hover{color:#111}.auth-footer{position:absolute;bottom:18px;color:#aaa;font-size:8px;letter-spacing:.04em}
+        .auth-brand{font-size:14px;font-weight:700;letter-spacing:.08em;margin-bottom:34px}.auth-card .eyebrow{margin-bottom:8px}.auth-card h1{margin:0;font-size:30px;line-height:1.08;letter-spacing:-.045em;font-weight:600}.auth-copy{margin:11px 0 24px;color:#929290;font-size:11px;line-height:1.6}.auth-form{display:grid;gap:16px}.auth-form label{font-size:8px;color:#aaa;letter-spacing:.12em;font-weight:700}.auth-form input{display:block;width:100%;height:46px;margin-top:7px;padding:0 13px;border:1px solid #e1e1df;border-radius:11px;background:rgba(255,255,255,.85);font:inherit;font-size:11px;letter-spacing:normal;outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.015)}.auth-form input:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.035)}.auth-submit{height:46px;margin-top:4px;border:1px solid #111;border-radius:11px;background:#111;color:#fff;font-size:10px;font-weight:600;cursor:pointer;box-shadow:0 12px 25px rgba(0,0,0,.13)}.auth-submit:disabled,.google-submit:disabled{opacity:.55;cursor:wait}.google-submit{height:46px;width:100%;border:1px solid #dededb;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:10px;font-weight:600;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.03)}.google-mark{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-size:12px;font-weight:800;border:1px solid #e8e8e6}.auth-divider{display:flex;align-items:center;gap:10px;color:#b0b0ad;font-size:9px;margin:16px 0}.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:#ededeb}.auth-message{margin:15px 0 0;padding:11px 12px;border:1px solid #e4e4e2;border-radius:10px;background:#fafafa;color:#666;font-size:9px;line-height:1.5}.auth-switch{width:100%;border:0;background:transparent;margin-top:20px;color:#777;font-size:9px;cursor:pointer}.auth-switch:hover{color:#111}.auth-footer{position:absolute;bottom:18px;color:#aaa;font-size:8px;letter-spacing:.04em}
         @media(max-width:520px){.auth-card{padding:28px 22px;border-radius:19px}.auth-card h1{font-size:26px}.auth-footer{display:none}}
       `}</style>
     </main>
