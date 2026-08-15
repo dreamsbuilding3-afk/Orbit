@@ -21,23 +21,26 @@ export default function AuthPage() {
     try {
       if (!supabase) throw new Error("Supabase n'est pas encore configuré pour cet environnement.");
 
-      const result = mode === "signin"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password, options: { data: { company_name: company } } });
-
-      if (result.error) throw result.error;
-
-      if (mode === "signup" && result.data.user) {
-        const slug = company.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-        const { error } = await supabase.rpc("create_organization", {
-          org_name: company.trim(),
-          org_slug: slug || `workspace-${result.data.user.id.slice(0, 8)}`,
-        });
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        router.push("/");
+        router.refresh();
+        return;
       }
 
-      if (mode === "signup" && !result.data.session) {
-        setMessage("Compte créé. Vérifie ton email pour confirmer ton adresse.");
+      if (!company.trim()) throw new Error("Indique le nom de ton entreprise.");
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { company_name: company.trim() } },
+      });
+      if (error) throw error;
+
+      // The database trigger creates the organization from company_name.
+      // This also works when Supabase requires email confirmation and no session exists yet.
+      if (!data.session) {
+        setMessage("Compte créé. Vérifie ton email pour confirmer ton adresse, puis connecte-toi.");
       } else {
         router.push("/");
         router.refresh();
