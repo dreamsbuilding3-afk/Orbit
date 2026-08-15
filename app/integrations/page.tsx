@@ -1,28 +1,48 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase-browser";
+
 const integrations = [
-  { name: "Gmail", category: "Communication", status: "Ready", description: "Read, classify and send business emails." },
-  { name: "Google Calendar", category: "Scheduling", status: "Ready", description: "Create and manage appointments automatically." },
-  { name: "Stripe", category: "Payments", status: "Ready", description: "React to payments, invoices and failed charges." },
-  { name: "WhatsApp", category: "Messaging", status: "Connect", description: "Send customer and team notifications." },
-  { name: "CRM", category: "Customers", status: "Connect", description: "Keep customer records synchronized." },
-  { name: "Shopify", category: "Commerce", status: "Connect", description: "Turn orders into automated business actions." },
+  { provider: "gmail", name: "Gmail", category: "Communication", description: "Read, classify and send business emails." },
+  { provider: "google_calendar", name: "Google Calendar", category: "Scheduling", description: "Create and manage appointments automatically." },
+  { provider: "stripe", name: "Stripe", category: "Payments", description: "React to payments, invoices and failed charges." },
+  { provider: "whatsapp", name: "WhatsApp", category: "Messaging", description: "Send customer and team notifications." },
+  { provider: "crm", name: "CRM", category: "Customers", description: "Keep customer records synchronized." },
+  { provider: "shopify", name: "Shopify", category: "Commerce", description: "Turn orders into automated business actions." },
 ];
 
+type Connection = { provider: string; status: string; account_label: string | null };
+
 export default function IntegrationsPage() {
-  return (
-    <main style={{ minHeight: "100vh", background: "#f8f8f8", color: "#111", fontFamily: "Arial, sans-serif", padding: "48px" }}>
-      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-        <a href="/" style={{ color: "#555", textDecoration: "none" }}>← Back to ORBIT</a>
-        <div style={{ marginTop: 48, marginBottom: 32 }}><p style={{ letterSpacing: ".14em", fontSize: 11, color: "#777" }}>CONNECTIONS</p><h1 style={{ fontSize: 42, margin: "8px 0" }}>Integrations</h1><p style={{ color: "#666", fontSize: 16 }}>Connect the tools your business already uses. ORBIT handles the work between them.</p></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14 }}>
-          {integrations.map((integration) => (
-            <article key={integration.name} style={{ background: "rgba(255,255,255,.82)", border: "1px solid #e7e7e7", borderRadius: 22, padding: 24, minHeight: 180, boxShadow: "0 12px 35px rgba(0,0,0,.035)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ width: 42, height: 42, borderRadius: 12, border: "1px solid #e5e5e5", display: "grid", placeItems: "center", background: "white", fontWeight: 700 }}>{integration.name.slice(0,1)}</div><span style={{ fontSize: 12, color: "#777" }}>{integration.status}</span></div>
-              <h3 style={{ margin: "24px 0 7px" }}>{integration.name}</h3><p style={{ margin: 0, color: "#777", lineHeight: 1.5, fontSize: 14 }}>{integration.description}</p>
-              <div style={{ marginTop: 18, fontSize: 11, letterSpacing: ".1em", color: "#999" }}>{integration.category.toUpperCase()}</div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </main>
-  );
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setMessage("Connecte-toi à ORBIT pour gérer les intégrations."); return; }
+      const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
+      const org = memberships?.[0]?.organization_id;
+      if (!org) return;
+      const { data } = await supabase.from("integration_connections").select("provider,status,account_label").eq("organization_id", org);
+      setConnections(data ?? []);
+    }
+    load();
+  }, []);
+
+  async function connect(provider: string) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setMessage("Connecte-toi à ORBIT d'abord."); return; }
+    const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
+    const org = memberships?.[0]?.organization_id;
+    if (!org) { setMessage("Aucun workspace ORBIT trouvé."); return; }
+    const { error } = await supabase.from("integration_connections").upsert({ organization_id: org, provider, status: "connected", account_label: "Connection ready" }, { onConflict: "organization_id,provider" });
+    if (error) setMessage(error.message); else setConnections(current => [...current.filter(c => c.provider !== provider), { provider, status: "connected", account_label: "Connection ready" }]);
+  }
+
+  return <main className="app-shell"><section className="content" style={{ width: "100%" }}><header className="topbar"><Link href="/">ORBIT</Link><span className="topbar-muted">Connections</span></header><div className="page"><div className="hero-row"><div><p className="eyebrow">CONNECTIONS</p><h1>Tools that work together.</h1><p className="hero-copy">Connect the software your business already uses. ORBIT will handle the work between them.</p></div></div>{message && <div className="glass-card" style={{padding:16,marginBottom:20}}>{message}</div>}<div className="integration-grid">{integrations.map(i => { const c = connections.find(x => x.provider === i.provider); const connected = c?.status === "connected"; return <article className="glass-card integration-card" key={i.provider}><div className="integration-head"><div className="integration-icon">{i.name.slice(0,1)}</div><span className="integration-status">{connected ? "Connected" : "Not connected"}</span></div><h3>{i.name}</h3><p>{i.description}</p><div className="integration-bottom"><span>{i.category.toUpperCase()}</span><button className="secondary-button" onClick={() => connect(i.provider)}>{connected ? "Connected" : "Connect"}</button></div></article>; })}</div></div></section></main>;
 }
