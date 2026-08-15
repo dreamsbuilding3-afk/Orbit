@@ -35,6 +35,19 @@ export default function IntegrationsPage() {
 
   async function connect(provider: string) {
     if (!supabase) return;
+    if (provider === "gmail") {
+      setMessage("Opening Google authorization…");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { access_type: "offline", prompt: "consent" },
+          scopes: "openid email profile https://www.googleapis.com/auth/gmail.modify",
+        },
+      });
+      if (error) setMessage(error.message);
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setMessage("Connecte-toi à ORBIT d'abord."); return; }
     const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
