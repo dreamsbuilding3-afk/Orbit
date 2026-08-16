@@ -15,9 +15,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const secret = request.headers.get("x-orbit-webhook-secret") || request.nextUrl.searchParams.get("secret");
   if (!secret) return NextResponse.json({ error: "Missing webhook secret." }, { status: 401 });
 
-  let payload: unknown = {};
+  let payload: Record<string, unknown> = {};
   try {
-    payload = await request.json();
+    const parsed = await request.json();
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) payload = parsed as Record<string, unknown>;
   } catch {
     payload = {};
   }
@@ -33,7 +34,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: error.message }, { status });
   }
 
-  return NextResponse.json({ accepted: true, run_id: runId, status: "queued" }, { status: 202 });
+  const { error: eventError } = await supabase.rpc("record_ark_event", {
+    p_workflow_id: workflowId,
+    p_event_type: "workflow.webhook.received",
+    p_source: "orbit_webhook",
+    p_entity_type: "workflow_run",
+    p_entity_id: runId,
+    p_payload: payload,
+  });
+
+  return NextResponse.json({
+    accepted: true,
+    run_id: runId,
+    ark_event_recorded: !eventError,
+    status: "queued",
+  }, { status: 202 });
 }
 
 export async function GET(_request: NextRequest) {
