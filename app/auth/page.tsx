@@ -4,6 +4,13 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 
+const googleGmailScopes = [
+  "openid",
+  "email",
+  "profile",
+  "https://www.googleapis.com/auth/gmail.modify",
+].join(" ");
+
 export default function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -22,7 +29,11 @@ export default function AuthPage() {
       const redirectTo = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo, queryParams: { access_type: "offline", prompt: "consent" } },
+        options: {
+          redirectTo,
+          scopes: googleGmailScopes,
+          queryParams: { access_type: "offline", prompt: "consent" },
+        },
       });
       if (error) throw error;
     } catch (error) {
