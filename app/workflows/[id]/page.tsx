@@ -13,6 +13,17 @@ const fallback: Step[] = [
   { position: 1, step_type: "action", name: "Action", description: "Choose what ORBIT should execute.", config: {} },
 ];
 
+function applyTemplate(value: string, context: Record<string, string>) {
+  return value.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => context[key.trim()] ?? "");
+}
+
+function base64Url(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 export default function WorkflowPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -20,6 +31,7 @@ export default function WorkflowPage() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
 
   async function load() {
@@ -42,7 +54,7 @@ export default function WorkflowPage() {
   }
 
   function addStep(type: "condition" | "action") {
-    setSteps(current => [...current, { position: current.length, step_type: type, name: type === "condition" ? "Condition" : "Action", description: "Configure this step.", config: {} }]);
+    setSteps(current => [...current, { position: current.length, step_type: type, name: type === "condition" ? "Condition" : "Action", description: "Configure this step.", config: type === "action" ? { app: "Gmail", to: "{{client.email}}", subject: "Welcome", message: "Hello {{client.name}}" } : {} }]);
   }
 
   async function save() {
@@ -54,11 +66,76 @@ export default function WorkflowPage() {
     setSaving(false);
   }
 
+  async function runWorkflow() {
+    if (!supabase || !workflow) return;
+    setRunning(true); setMessage("");
+    let runId: string | null = null;
+    try {
+      const { data: run, error: runError } = await supabase.from("workflow_runs").insert({ workflow_id: workflow.id, status: "running", context: { source: "manual_test" } }).select("id").single();
+      if (runError) throw runError;
+      runId = run.id;
+      const context = { "client.email": "test@example.com", "client.name": "Test Client", "company.name": "Orbit Test" };
+
+      for (const step of steps) {
+        const startedAt = new Date().toISOString();
+        const { data: runStep, error: runStepError } = await supabase.from("workflow_run_steps").insert({ run_id: runId, step_id: step.id ?? null, status: "running", started_at: startedAt }).select("id").single();
+        if (runStepError) throw runStepError;
+
+        try {
+          if (step.step_type === "condition") {
+            await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output: { evaluated: true } }).eq("id", runStep.id);
+            continue;
+          }
+
+          if (step.step_type === "action" && String(step.config.app ?? "").toLowerCase() === "gmail") {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const providerToken = sessionData.session?.provider_token;
+            if (!providerToken) throw new Error("Gmail provider token unavailable. Reconnect Google with Gmail access before running this workflow.");
+            const to = applyTemplate(String(step.config.to ?? ""), context);
+            const subject = applyTemplate(String(step.config.subject ?? ""), context);
+            const body = applyTemplate(String(step.config.message ?? ""), context);
+            if (!to || !subject) throw new Error("Gmail action requires a recipient and subject.");
+            const raw = [
+              `To: ${to}`,
+              "Content-Type: text/plain; charset=utf-8",
+              "MIME-Version: 1.0",
+              `Subject: ${subject}`,
+              "",
+              body,
+            ].join("\r\n");
+            const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${providerToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ raw: base64Url(raw) }),
+            });
+            if (!response.ok) throw new Error(`Gmail API error (${response.status}).`);
+            const output = await response.json();
+            await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output }).eq("id", runStep.id);
+            continue;
+          }
+
+          await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output: { simulated: true, reason: "No executor configured for this action yet" } }).eq("id", runStep.id);
+        } catch (stepError) {
+          await supabase.from("workflow_run_steps").update({ status: "failed", finished_at: new Date().toISOString(), error_message: stepError instanceof Error ? stepError.message : "Step failed" }).eq("id", runStep.id);
+          throw stepError;
+        }
+      }
+
+      await supabase.from("workflow_runs").update({ status: "completed", finished_at: new Date().toISOString() }).eq("id", runId);
+      setMessage("Workflow executed successfully.");
+    } catch (error) {
+      if (runId) await supabase.from("workflow_runs").update({ status: "failed", finished_at: new Date().toISOString(), error_message: error instanceof Error ? error.message : "Workflow failed" }).eq("id", runId);
+      setMessage(error instanceof Error ? error.message : "Workflow execution failed.");
+    } finally {
+      setRunning(false);
+    }
+  }
+
   if (loading) return <main className="app-shell"><section className="content"><div className="page"><p>Loading workflow…</p></div></section></main>;
 
   return <main className="app-shell">
     <section className="content" style={{ width: "100%" }}>
-      <header className="topbar"><div className="breadcrumbs"><Link href="/workflows">Workflows</Link><b>/</b><strong>{workflow?.name ?? "Workflow"}</strong></div><button className="builder-save" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save workflow"}</button></header>
+      <header className="topbar"><div className="breadcrumbs"><Link href="/workflows">Workflows</Link><b>/</b><strong>{workflow?.name ?? "Workflow"}</strong></div><div style={{ display: "flex", gap: 9 }}><button className="secondary-button" onClick={runWorkflow} disabled={running || saving}>{running ? "Running…" : "Run test"}</button><button className="builder-save" onClick={save} disabled={saving || running}>{saving ? "Saving…" : "Save workflow"}</button></div></header>
       <div className="page">
         {!workflow ? <div className="glass-card" style={{ padding: 32 }}>{message || "Workflow not found."}</div> : <>
           <div className="hero-row"><div><p className="eyebrow">WORKFLOW BUILDER</p><h1>{workflow.name}</h1><p className="hero-copy">{workflow.description || "Connect an event to the work ORBIT should execute automatically."}</p></div><span className="status-pill">{workflow.status}</span></div>
