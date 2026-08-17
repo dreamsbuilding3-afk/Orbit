@@ -37,8 +37,10 @@ export default function NewWorkflowPage() {
 
   function add(kind: Kind) {
     const [title, detail, app] = templates[kind];
-    const config = kind === "action" && app === "Gmail" ? { to: "{{client.email}}", subject: "Your update from {{company.name}}", body: "Hello {{client.first_name}},\n\nHere is an update from our team." } : {};
-    const next = { id: Date.now(), kind, title, detail, app, config };
+    const config: Record<string, string> = kind === "action" && app === "Gmail"
+      ? { to: "{{client.email}}", subject: "Your update from {{company.name}}", body: "Hello {{client.first_name}},\n\nHere is an update from our team." }
+      : {};
+    const next: Step = { id: Date.now(), kind, title, detail, app, config };
     setSteps(s => [...s, next]);
     setSelected(next.id);
   }
