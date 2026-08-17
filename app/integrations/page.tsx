@@ -16,7 +16,10 @@ const integrations = [
 type Connection = { provider: string; status: string; account_label: string | null };
 
 function base64Url(value: string) {
-  return btoa(unescape(encodeURIComponent(value))).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/g, "");
+  return btoa(unescape(encodeURIComponent(value)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
 }
 
 export default function IntegrationsPage() {
@@ -84,7 +87,7 @@ export default function IntegrationsPage() {
         "Content-Type: text/plain; charset=UTF-8",
         "",
         body,
-      ].join("\\r\\n");
+      ].join("\r\n");
       const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
