@@ -16,7 +16,7 @@ type Step = {
 
 const templates: Record<Kind, [string, string, string]> = {
   trigger: ["New client detected", "When a business event occurs", "Website"],
-  condition: ["Check a condition", "Continue only when the rule is true", "ORBIT"],
+  condition: ["Check a condition", "Continue only when the rule is true", "WineTime"],
   action: ["Send an email", "Send a message using a connected Gmail account", "Gmail"],
 };
 
@@ -55,7 +55,7 @@ export default function NewWorkflowPage() {
     setSaving(true); setMessage("");
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Connecte-toi à ORBIT avant de sauvegarder.");
+      if (!user) throw new Error("Connecte-toi à WineTime avant de sauvegarder.");
       const { data: workflowId, error } = await supabase.rpc("create_workflow", {
         workflow_name: name,
         workflow_description: "Business automation workflow",
@@ -67,7 +67,7 @@ export default function NewWorkflowPage() {
         steps: steps.map((s, position) => ({ position, step_type: s.kind, name: s.title, description: s.detail, config: { app: s.app, ...s.config } })),
       });
       if (stepError) throw stepError;
-      setMessage("Workflow enregistré dans ORBIT.");
+      setMessage("Workflow enregistré dans WineTime.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Impossible d'enregistrer.");
     } finally {
@@ -79,16 +79,16 @@ export default function NewWorkflowPage() {
   const isGmail = active?.kind === "action" && active.app === "Gmail";
 
   return <main className="workflow-builder">
-    <header className="builder-topbar"><div className="builder-brand"><Link href="/workflows">ORBIT</Link><span>/</span><strong>New workflow</strong></div><div className="builder-actions"><Link className="builder-ghost" href="/workflows">Cancel</Link><button className="builder-save" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save workflow"}</button></div></header>
+    <header className="builder-topbar"><div className="builder-brand"><Link href="/workflows">WineTime</Link><span>/</span><strong>New workflow</strong></div><div className="builder-actions"><Link className="builder-ghost" href="/workflows">Cancel</Link><button className="builder-save" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save workflow"}</button></div></header>
     <div className="builder-layout">
       <aside className="builder-side">
         <Link href="/workflows" className="back-link">← Workflows</Link>
-        <div className="builder-title"><p className="eyebrow">NEW AUTOMATION</p><h1>Build the next workflow.</h1><p>Connect a business event to the actions ORBIT should execute.</p></div>
+        <div className="builder-title"><p className="eyebrow">NEW AUTOMATION</p><h1>Build the next workflow.</h1><p>Connect a business event to the actions WineTime should execute.</p></div>
         <label className="field-label">WORKFLOW NAME<input value={name} onChange={e => setName(e.target.value)} /></label>
         <div className="side-section"><p className="eyebrow">ADD TO FLOW</p><button onClick={() => add("trigger")}><span>01</span>Trigger <b>+</b></button><button onClick={() => add("condition")}><span>?</span>Condition <b>+</b></button><button onClick={() => add("action")}><span>→</span>Action <b>+</b></button></div>
       </aside>
       <section className="canvas">
-        <div className="canvas-head"><div><p className="eyebrow">AUTOMATION LOGIC</p><h2>When this happens, ORBIT does the rest.</h2></div></div>
+        <div className="canvas-head"><div><p className="eyebrow">AUTOMATION LOGIC</p><h2>When this happens, WineTime does the rest.</h2></div></div>
         {message && <div className="save-message">{message}</div>}
         <div className="flow-canvas"><div className="flow-column">
           {steps.map((s, i) => <div className="flow-block-wrap" key={s.id}>
@@ -112,7 +112,7 @@ export default function NewWorkflowPage() {
             <label className="field-label">TO<input value={active.config.to ?? ""} onChange={e => updateSelected({}, { to: e.target.value })} placeholder="client@email.com or {{client.email}}" /></label>
             <label className="field-label">SUBJECT<input value={active.config.subject ?? ""} onChange={e => updateSelected({}, { subject: e.target.value })} /></label>
             <label className="field-label">MESSAGE<textarea rows={7} value={active.config.body ?? ""} onChange={e => updateSelected({}, { body: e.target.value })} /></label>
-            <div className="hint-box">Use variables such as <code>{"{{client.email}}"}</code> and <code>{"{{company.name}}"}</code>. ORBIT resolves them when the workflow runs.</div>
+            <div className="hint-box">Use variables such as <code>{"{{client.email}}"}</code> and <code>{"{{company.name}}"}</code>. WineTime resolves them when the workflow runs.</div>
           </div>}
         </>}
       </aside>
