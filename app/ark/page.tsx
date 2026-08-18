@@ -52,7 +52,7 @@ export default function ArkPage() {
   return (
     <main className="ark-shell">
       <header className="ark-topbar">
-        <div className="ark-brand"><span className="ark-orbit"><i /></span><Link href="/">ORBARK</Link><span>/</span><strong>ARK</strong></div>
+        <div className="ark-brand"><span className="ark-orbit"><i /></span><Link href="/">WineTime</Link><span>/</span><strong>ARK</strong></div>
         <nav className="ark-nav"><Link className="active" href="/ark">Brief</Link><Link href="/ark/opportunities">Opportunities</Link><Link href="/ark/memory">Memory</Link></nav>
       </header>
 
@@ -61,20 +61,20 @@ export default function ArkPage() {
           <div>
             <p className="eyebrow">ARK INTELLIGENCE</p>
             <h1>Your business,<br />understood.</h1>
-            <p>ARK analyzes the real signals flowing through ORBARK and surfaces what matters next.</p>
+            <p>ARK analyzes the real signals flowing through WineTime and surfaces what matters next.</p>
           </div>
           <div className="ark-state"><span />{loading ? "Analyzing workspace" : "Intelligence layer active"}</div>
         </section>
 
         <section className="brief-grid">
-          <article className="brief-card focus-card"><p className="eyebrow">ARK DAILY BRIEF</p><h2>ARK THINKS.<br /><span>ORBIT DOES.</span></h2><p className="muted">Signals enter through ORBIT. ARK analyzes them without replacing your existing automations.</p><Link href="/ark/opportunities" className="brief-button">Review opportunities →</Link></article>
+          <article className="brief-card focus-card"><p className="eyebrow">ARK DAILY BRIEF</p><h2>ARK THINKS.<br /><span>WineTime DOES.</span></h2><p className="muted">Signals enter through WineTime. ARK analyzes them without replacing your existing automations.</p><Link href="/ark/opportunities" className="brief-button">Review opportunities →</Link></article>
           <article className="brief-card metric-focus"><p className="eyebrow">SIGNALS</p><strong>{metrics.events}</strong><span>recent business events</span><small>Real events captured by the ARK event stream.</small></article>
-          <article className="brief-card metric-focus"><p className="eyebrow">OPPORTUNITIES</p><strong>{metrics.opportunities}</strong><span>verified open signals</span><small>Created only when ORBARK receives defensible source data.</small></article>
+          <article className="brief-card metric-focus"><p className="eyebrow">OPPORTUNITIES</p><strong>{metrics.opportunities}</strong><span>verified open signals</span><small>Created only when WineTime receives defensible source data.</small></article>
         </section>
 
-        <section className="brief-section"><div className="section-head"><div><p className="eyebrow">ARK RADAR</p><h2>Recent business signals</h2></div><Link href="/ark/opportunities">View findings →</Link></div><div className="run-list">{recentEvents.length ? recentEvents.map(event => <div className="run-row" key={event.id}><span className="run-dot completed"/><div><strong>{event.event_type}</strong><small>{event.source} · {new Date(event.occurred_at).toLocaleString()}</small></div><span className="run-status completed">observed</span></div>) : <div className="empty-state"><strong>ARK is waiting for real business signals.</strong><span>Use a connected integration or webhook to send the first event into ORBARK.</span></div>}</div></section>
+        <section className="brief-section"><div className="section-head"><div><p className="eyebrow">ARK RADAR</p><h2>Recent business signals</h2></div><Link href="/ark/opportunities">View findings →</Link></div><div className="run-list">{recentEvents.length ? recentEvents.map(event => <div className="run-row" key={event.id}><span className="run-dot completed"/><div><strong>{event.event_type}</strong><small>{event.source} · {new Date(event.occurred_at).toLocaleString()}</small></div><span className="run-status completed">observed</span></div>) : <div className="empty-state"><strong>ARK is waiting for real business signals.</strong><span>Use a connected integration or webhook to send the first event into WineTime.</span></div>}</div></section>
 
-        <section className="brief-section"><div className="section-head"><div><p className="eyebrow">EXECUTION</p><h2>What ORBIT actually did</h2></div><Link href="/activity">View activity →</Link></div><div className="run-list">{recentRuns.length ? recentRuns.slice(0, 8).map(run => <div className="run-row" key={run.id}><span className={`run-dot ${run.status}`} /><div><strong>Workflow execution</strong><small>{run.started_at ? new Date(run.started_at).toLocaleString() : "No start time"}</small></div><span className={`run-status ${run.status}`}>{run.status}</span></div>) : <div className="empty-state"><strong>No workflow runs yet.</strong><span>When ORBIT executes, ARK will be able to use the resulting signals.</span></div>}</div></section>
+        <section className="brief-section"><div className="section-head"><div><p className="eyebrow">EXECUTION</p><h2>What WineTime actually did</h2></div><Link href="/activity">View activity →</Link></div><div className="run-list">{recentRuns.length ? recentRuns.slice(0, 8).map(run => <div className="run-row" key={run.id}><span className={`run-dot ${run.status}`} /><div><strong>Workflow execution</strong><small>{run.started_at ? new Date(run.started_at).toLocaleString() : "No start time"}</small></div><span className={`run-status ${run.status}`}>{run.status}</span></div>) : <div className="empty-state"><strong>No workflow runs yet.</strong><span>When WineTime executes, ARK will be able to use the resulting signals.</span></div>}</div></section>
 
         <section className="control-card"><div><p className="eyebrow">HUMAN CONTROL</p><h2>Intelligence without losing control.</h2><p>ARK recommends first. Sensitive actions stay behind explicit permissions.</p></div><Link href="/integrations">Manage connected tools →</Link></section>
       </div>
