@@ -17,12 +17,18 @@ export default function AuthCallbackPage() {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) { setMessage(error.message); return; }
       }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setMessage("No authenticated session found."); return; }
+
+      const [{ data: { user } }, { data: { session } }] = await Promise.all([
+        supabase.auth.getUser(),
+        supabase.auth.getSession(),
+      ]);
+      if (!user || !session) { setMessage("No authenticated session found."); return; }
+
       const { data: memberships, error: membershipError } = await supabase
         .from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
       if (membershipError || !memberships?.[0]) { setMessage("No ORBIT workspace found for this account."); return; }
       const org = memberships[0].organization_id;
+
       const { error } = await supabase.from("integration_connections").upsert({
         organization_id: org,
         provider: "gmail",
@@ -33,6 +39,23 @@ export default function AuthCallbackPage() {
         last_error: null,
       }, { onConflict: "organization_id,provider" });
       if (error) { setMessage(error.message); return; }
+
+      if (session.provider_refresh_token) {
+        const response = await fetch("/api/integrations/google/store-token", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ providerRefreshToken: session.provider_refresh_token }),
+        });
+        if (!response.ok) {
+          const detail = await response.json().catch(() => null) as { error?: string } | null;
+          setMessage(detail?.error ?? "Google connected, but secure token storage failed.");
+          return;
+        }
+      }
+
       if (!cancelled) router.replace("/integrations?connected=gmail");
     }
     finish();
