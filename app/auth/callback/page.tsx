@@ -26,7 +26,7 @@ export default function AuthCallbackPage() {
 
       const { data: memberships, error: membershipError } = await supabase
         .from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
-      if (membershipError || !memberships?.[0]) { setMessage("No ORBIT workspace found for this account."); return; }
+      if (membershipError || !memberships?.[0]) { setMessage("No WineTime workspace found for this account."); return; }
       const org = memberships[0].organization_id;
 
       const { error } = await supabase.from("integration_connections").upsert({
@@ -62,5 +62,5 @@ export default function AuthCallbackPage() {
     return () => { cancelled = true; };
   }, [router]);
 
-  return <main className="app-shell"><section className="content" style={{ width: "100%" }}><div className="page"><div className="glass-card" style={{ maxWidth: 560, margin: "15vh auto", padding: 32, textAlign: "center" }}><p className="eyebrow">ORBIT CONNECTION</p><h1>Connecting Gmail</h1><p className="hero-copy">{message}</p></div></div></section></main>;
+  return <main className="app-shell"><section className="content" style={{ width: "100%" }}><div className="page"><div className="glass-card" style={{ maxWidth: 560, margin: "15vh auto", padding: 32, textAlign: "center" }}><p className="eyebrow">WineTime CONNECTION</p><h1>Connecting Gmail</h1><p className="hero-copy">{message}</p></div></div></section></main>;
 }
