@@ -27,15 +27,15 @@ export default function IntegrationsPage() {
   const [message, setMessage] = useState("");
   const [testOpen, setTestOpen] = useState(false);
   const [to, setTo] = useState("");
-  const [subject, setSubject] = useState("ORBIT Gmail test");
-  const [body, setBody] = useState("This is a real message sent from ORBIT through Gmail.");
+  const [subject, setSubject] = useState("WineTime Gmail test");
+  const [body, setBody] = useState("This is a real message sent from WineTime through Gmail.");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     async function load() {
       if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setMessage("Connecte-toi à ORBIT pour gérer les intégrations."); return; }
+      if (!user) { setMessage("Connecte-toi à WineTime pour gérer les intégrations."); return; }
       const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
       const org = memberships?.[0]?.organization_id;
       if (!org) return;
@@ -61,10 +61,10 @@ export default function IntegrationsPage() {
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setMessage("Connecte-toi à ORBIT d'abord."); return; }
+    if (!user) { setMessage("Connecte-toi à WineTime d'abord."); return; }
     const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
     const org = memberships?.[0]?.organization_id;
-    if (!org) { setMessage("Aucun workspace ORBIT trouvé."); return; }
+    if (!org) { setMessage("Aucun workspace WineTime trouvé."); return; }
     const { error } = await supabase.from("integration_connections").upsert({ organization_id: org, provider, status: "connected", account_label: "Connection ready" }, { onConflict: "organization_id,provider" });
     if (error) setMessage(error.message); else setConnections(current => [...current.filter(c => c.provider !== provider), { provider, status: "connected", account_label: "Connection ready" }]);
   }
@@ -108,9 +108,9 @@ export default function IntegrationsPage() {
 
   return <main className="app-shell">
     <section className="content" style={{ width: "100%" }}>
-      <header className="topbar"><Link href="/">ORBIT</Link><span className="topbar-muted">Connections</span></header>
+      <header className="topbar"><Link href="/">WineTime</Link><span className="topbar-muted">Connections</span></header>
       <div className="page">
-        <div className="hero-row"><div><p className="eyebrow">CONNECTIONS</p><h1>Tools that work together.</h1><p className="hero-copy">Connect the software your business already uses. ORBIT will handle the work between them.</p></div></div>
+        <div className="hero-row"><div><p className="eyebrow">CONNECTIONS</p><h1>Tools that work together.</h1><p className="hero-copy">Connect the software your business already uses. WineTime will handle the work between them.</p></div></div>
         {message && <div className="glass-card" style={{ padding: 16, marginBottom: 20 }}>{message}</div>}
         <div className="integration-grid">
           {integrations.map(i => {
