@@ -10,7 +10,7 @@ type Workflow = { id: string; name: string; description: string | null; status: 
 
 const fallback: Step[] = [
   { position: 0, step_type: "trigger", name: "Trigger", description: "Choose what starts this workflow.", config: {} },
-  { position: 1, step_type: "action", name: "Action", description: "Choose what ORBIT should execute.", config: {} },
+  { position: 1, step_type: "action", name: "Action", description: "Choose what WineTime should execute.", config: {} },
 ];
 
 function applyTemplate(value: string, context: Record<string, string>) {
@@ -37,7 +37,7 @@ export default function WorkflowPage() {
   async function load() {
     if (!supabase) { setMessage("Supabase n'est pas configuré."); setLoading(false); return; }
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setMessage("Connecte-toi à ORBIT pour ouvrir ce workflow."); setLoading(false); return; }
+    if (!user) { setMessage("Connecte-toi à WineTime pour ouvrir ce workflow."); setLoading(false); return; }
     const { data, error } = await supabase.from("workflows").select("id,name,description,status,trigger_type").eq("id", id).single();
     if (error) { setMessage(error.message); setLoading(false); return; }
     const { data: stepData, error: stepError } = await supabase.from("workflow_steps").select("id,position,step_type,name,description,config").eq("workflow_id", id).order("position");
@@ -62,7 +62,7 @@ export default function WorkflowPage() {
     setSaving(true); setMessage("");
     const normalized = steps.map((s, position) => ({ position, step_type: s.step_type, name: s.name, description: s.description, config: s.config }));
     const { error } = await supabase.rpc("save_workflow_steps", { target_workflow: workflow.id, steps: normalized });
-    if (error) setMessage(error.message); else setMessage("Workflow saved in ORBIT.");
+    if (error) setMessage(error.message); else setMessage("Workflow saved in WineTime.");
     setSaving(false);
   }
 
@@ -74,7 +74,7 @@ export default function WorkflowPage() {
       const { data: run, error: runError } = await supabase.from("workflow_runs").insert({ workflow_id: workflow.id, status: "running", context: { source: "manual_test" } }).select("id").single();
       if (runError) throw runError;
       runId = run.id;
-      const context = { "client.email": "test@example.com", "client.name": "Test Client", "company.name": "Orbit Test" };
+      const context = { "client.email": "test@example.com", "client.name": "Test Client", "company.name": "WineTime Test" };
 
       for (const step of steps) {
         const startedAt = new Date().toISOString();
@@ -138,7 +138,7 @@ export default function WorkflowPage() {
       <header className="topbar"><div className="breadcrumbs"><Link href="/workflows">Workflows</Link><b>/</b><strong>{workflow?.name ?? "Workflow"}</strong></div><div style={{ display: "flex", gap: 9 }}><button className="secondary-button" onClick={runWorkflow} disabled={running || saving}>{running ? "Running…" : "Run test"}</button><button className="builder-save" onClick={save} disabled={saving || running}>{saving ? "Saving…" : "Save workflow"}</button></div></header>
       <div className="page">
         {!workflow ? <div className="glass-card" style={{ padding: 32 }}>{message || "Workflow not found."}</div> : <>
-          <div className="hero-row"><div><p className="eyebrow">WORKFLOW BUILDER</p><h1>{workflow.name}</h1><p className="hero-copy">{workflow.description || "Connect an event to the work ORBIT should execute automatically."}</p></div><span className="status-pill">{workflow.status}</span></div>
+          <div className="hero-row"><div><p className="eyebrow">WORKFLOW BUILDER</p><h1>{workflow.name}</h1><p className="hero-copy">{workflow.description || "Connect an event to the work WineTime should execute automatically."}</p></div><span className="status-pill">{workflow.status}</span></div>
           {message && <div className="glass-card" style={{ padding: 16, marginBottom: 20 }}>{message}</div>}
           <div className="glass-card" style={{ padding: 28 }}>
             <div style={{ display: "grid", gap: 14 }}>
