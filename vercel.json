@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/ark/actions/auto-run",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 13 * * *"
     }
   ]
 }
