@@ -166,3 +166,52 @@
   table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   pre, code { max-width: 100%; overflow-x: auto; }
 }
+
+/* WineTime marketing layer: lead with the value recovered before the automation. */
+.hero-row > div:first-child .hero-copy {
+  font-size: 0 !important;
+  line-height: 1.6;
+  max-width: 720px;
+}
+.hero-row > div:first-child .hero-copy::after {
+  content: "Avant d'automatiser, découvrez ce que votre entreprise laisse sur la table : temps perdu, opportunités manquées et tâches qui coûtent cher. WineTime vous aide à identifier ce potentiel de gain avant de vous aider à agir.";
+  display: block;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #777;
+}
+.hero-row > div:first-child::after {
+  content: "VOYEZ D'ABORD OÙ VOUS PERDEZ DE L'ARGENT";
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  color: #555;
+  background: #fafaf9;
+}
+.intel-strip h2 {
+  max-width: 820px;
+}
+.intel-strip h2::after {
+  content: " Avant de faire plus, voyons ce qui vous coûte déjà.";
+  font-weight: 400;
+}
+.value-banner h3 {
+  font-size: 16px;
+}
+.value-banner h3::after {
+  content: " WineTime vous aide d'abord à voir le potentiel, puis à le récupérer.";
+  font-weight: 400;
+}
+
+@media (max-width: 760px) {
+  .hero-row > div:first-child .hero-copy::after { font-size: 13px; line-height: 1.6; }
+  .hero-row > div:first-child::after { margin-top: 14px; font-size: 8px; }
+  .intel-strip h2::after { display: block; margin-top: 5px; }
+  .value-banner h3 { font-size: 13px; }
+  .value-banner h3::after { display: block; margin-top: 4px; }
+}
