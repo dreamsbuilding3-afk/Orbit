@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ORBIT — Business automation",
+  title: "WineTime — Business automation",
   description: "Make your business work together.",
 };
 
