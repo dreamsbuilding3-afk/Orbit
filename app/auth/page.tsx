@@ -79,10 +79,10 @@ export default function AuthPage() {
     <main className="auth-page">
       <div className="auth-orbit-mark"><span /></div>
       <div className="auth-card">
-        <div className="auth-brand">ORBIT</div>
+        <div className="auth-brand">WineTime</div>
         <p className="eyebrow">BUSINESS AUTOMATION</p>
-        <h1>{mode === "signin" ? "Your business, in motion." : "Start your orbit."}</h1>
-        <p className="auth-copy">{mode === "signin" ? "Sign in to see what ORBIT is doing for your business." : "Create your workspace and start connecting the work between your tools."}</p>
+        <h1>{mode === "signin" ? "Your business, in motion." : "Start your WineTime."}</h1>
+        <p className="auth-copy">{mode === "signin" ? "Sign in to see what WineTime is doing for your business." : "Create your workspace and start connecting the work between your tools."}</p>
 
         <button className="google-button" type="button" onClick={continueWithGoogle} disabled={googleLoading || loading}>
           <span className="google-mark">G</span>
@@ -94,12 +94,12 @@ export default function AuthPage() {
           {mode === "signup" && <label>COMPANY<input required value={company} onChange={e => setCompany(e.target.value)} placeholder="Your company" /></label>}
           <label>EMAIL<input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" /></label>
           <label>PASSWORD<input required minLength={6} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" /></label>
-          <button className="auth-submit" disabled={loading || googleLoading}>{loading ? "Connecting…" : mode === "signin" ? "Enter ORBIT →" : "Create workspace →"}</button>
+          <button className="auth-submit" disabled={loading || googleLoading}>{loading ? "Connecting…" : mode === "signin" ? "Enter WineTime →" : "Create workspace →"}</button>
         </form>
 
         {message && <p className="auth-message">{message}</p>}
         <button className="auth-switch" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setMessage(""); }}>
-          {mode === "signin" ? "New to ORBIT? Create your workspace" : "Already have an account? Sign in"}
+          {mode === "signin" ? "New to WineTime? Create your workspace" : "Already have an account? Sign in"}
         </button>
       </div>
       <p className="auth-footer">Private workspace · Secure by Supabase · Built for real businesses</p>
