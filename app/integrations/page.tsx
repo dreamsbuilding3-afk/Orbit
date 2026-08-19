@@ -5,12 +5,12 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase-browser";
 
 const integrations = [
-  { provider: "gmail", name: "Gmail", category: "Communication", description: "Read, classify and send business emails." },
-  { provider: "google_calendar", name: "Google Calendar", category: "Scheduling", description: "Create and manage appointments automatically." },
-  { provider: "stripe", name: "Stripe", category: "Payments", description: "React to payments, invoices and failed charges." },
-  { provider: "whatsapp", name: "WhatsApp", category: "Messaging", description: "Send customer and team notifications." },
-  { provider: "crm", name: "CRM", category: "Customers", description: "Keep customer records synchronized." },
-  { provider: "shopify", name: "Shopify", category: "Commerce", description: "Turn orders into automated business actions." },
+  { provider: "gmail", name: "Gmail", category: "Communication", description: "Read, classify and send business emails.", available: true },
+  { provider: "google_calendar", name: "Google Calendar", category: "Scheduling", description: "Create and manage appointments automatically.", available: false },
+  { provider: "stripe", name: "Stripe", category: "Payments", description: "React to payments, invoices and failed charges.", available: false },
+  { provider: "whatsapp", name: "WhatsApp", category: "Messaging", description: "Send customer and team notifications.", available: false },
+  { provider: "crm", name: "CRM", category: "Customers", description: "Keep customer records synchronized.", available: false },
+  { provider: "shopify", name: "Shopify", category: "Commerce", description: "Turn orders into automated business actions.", available: false },
 ];
 
 type Connection = { provider: string; status: string; account_label: string | null };
@@ -39,7 +39,8 @@ export default function IntegrationsPage() {
       const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
       const org = memberships?.[0]?.organization_id;
       if (!org) return;
-      const { data } = await supabase.from("integration_connections").select("provider,status,account_label").eq("organization_id", org);
+      const { data, error } = await supabase.from("integration_connections_safe").select("provider,status,account_label").eq("organization_id", org);
+      if (error) { setMessage("Impossible de charger les connexions."); return; }
       setConnections(data ?? []);
     }
     load();
@@ -47,26 +48,20 @@ export default function IntegrationsPage() {
 
   async function connect(provider: string) {
     if (!supabase) return;
-    if (provider === "gmail") {
-      setMessage("Opening Google authorization…");
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: { access_type: "offline", prompt: "consent" },
-          scopes: "openid email profile https://www.googleapis.com/auth/gmail.modify",
-        },
-      });
-      if (error) setMessage(error.message);
+    if (provider !== "gmail") {
+      setMessage("Cette intégration arrive prochainement. Elle n'est pas encore active dans WineTime.");
       return;
     }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setMessage("Connecte-toi à WineTime d'abord."); return; }
-    const { data: memberships } = await supabase.from("organization_members").select("organization_id").eq("user_id", user.id).limit(1);
-    const org = memberships?.[0]?.organization_id;
-    if (!org) { setMessage("Aucun workspace WineTime trouvé."); return; }
-    const { error } = await supabase.from("integration_connections").upsert({ organization_id: org, provider, status: "connected", account_label: "Connection ready" }, { onConflict: "organization_id,provider" });
-    if (error) setMessage(error.message); else setConnections(current => [...current.filter(c => c.provider !== provider), { provider, status: "connected", account_label: "Connection ready" }]);
+    setMessage("Opening Google authorization…");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+        scopes: "openid email profile https://www.googleapis.com/auth/gmail.modify",
+      },
+    });
+    if (error) setMessage(error.message);
   }
 
   async function sendGmailTest() {
@@ -117,9 +112,9 @@ export default function IntegrationsPage() {
             const c = connections.find(x => x.provider === i.provider);
             const connected = c?.status === "connected";
             return <article className="glass-card integration-card" key={i.provider}>
-              <div className="integration-head"><div className="integration-icon">{i.name.slice(0,1)}</div><span className="integration-status">{connected ? "Connected" : "Not connected"}</span></div>
+              <div className="integration-head"><div className="integration-icon">{i.name.slice(0,1)}</div><span className="integration-status">{connected ? "Connected" : i.available ? "Not connected" : "Coming soon"}</span></div>
               <h3>{i.name}</h3><p>{i.description}</p>
-              <div className="integration-bottom"><span>{i.category.toUpperCase()}</span><button className="secondary-button" onClick={() => connect(i.provider)}>{connected ? "Connected" : "Connect"}</button></div>
+              <div className="integration-bottom"><span>{i.category.toUpperCase()}</span><button className="secondary-button" onClick={() => connect(i.provider)} disabled={!i.available}>{connected ? "Connected" : i.available ? "Connect" : "Coming soon"}</button></div>
               {i.provider === "gmail" && connected && <button className="secondary-button" style={{ marginTop: 12, width: "100%" }} onClick={() => setTestOpen(true)}>Send a test email</button>}
             </article>;
           })}
