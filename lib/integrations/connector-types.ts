@@ -21,6 +21,11 @@ export type WineTimeConnector = {
   signals: string[];
 };
 
+/**
+ * Canonical connector contract for WineTime.
+ * Providers should map their native events/records into this neutral shape
+ * before the loss-analysis engine consumes them.
+ */
 export type WineTimeSignal = {
   organizationId: string;
   connectorId: string;
