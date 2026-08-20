@@ -1,8 +1,7 @@
 import type { WineTimeSignal } from "./connector-types";
 
-export function normalizeSignal(
-  input: Omit<WineTimeSignal, "metadata"> & { metadata?: Record<string, unknown> },
-): WineTimeSignal {
+/** Normalize connector records into the common WineTime signal contract. */
+export function normalizeSignal(input: Omit<WineTimeSignal, "metadata"> & { metadata?: Record<string, unknown> }): WineTimeSignal {
   return {
     ...input,
     occurredAt: new Date(input.occurredAt).toISOString(),
