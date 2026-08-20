@@ -7,25 +7,27 @@ export default function SubscriptionLink() {
       aria-label="Ouvrir les abonnements WineTime"
       style={{
         position: "fixed",
-        right: 20,
-        bottom: 20,
+        left: 16,
+        bottom: 92,
         zIndex: 40,
-        display: "inline-flex",
+        width: 218,
+        boxSizing: "border-box",
+        display: "flex",
         alignItems: "center",
-        gap: 8,
-        padding: "10px 14px",
-        borderRadius: 12,
-        border: "1px solid rgba(0,0,0,.09)",
-        background: "rgba(255,255,255,.94)",
-        color: "#171717",
+        gap: 10,
+        padding: "10px 12px",
+        borderRadius: 10,
+        border: "1px solid rgba(0,0,0,.07)",
+        background: "rgba(255,255,255,.96)",
+        color: "#3f3f3d",
         textDecoration: "none",
-        fontSize: 11,
-        fontWeight: 700,
-        boxShadow: "0 12px 30px rgba(0,0,0,.10)",
+        fontSize: 12,
+        fontWeight: 600,
+        boxShadow: "0 6px 18px rgba(0,0,0,.06)",
         backdropFilter: "blur(14px)",
       }}
     >
-      <span aria-hidden="true">€</span>
+      <span aria-hidden="true" style={{ width: 18, textAlign: "center", fontSize: 15, lineHeight: 1 }}>€</span>
       Abonnement
     </Link>
   );
