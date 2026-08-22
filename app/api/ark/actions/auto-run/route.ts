@@ -32,8 +32,21 @@ export async function POST(request: Request) {
   let queued = 0;
   let skipped = 0;
   let failed = 0;
+  let rateLimited = 0;
 
   for (const recommendation of recommendations ?? []) {
+    const { data: rate, error: rateError } = await admin.rpc("check_action_rate_limit", {
+      p_organization_id: recommendation.organization_id,
+      p_action: "ark.auto-run",
+      p_limit: 60,
+      p_window_seconds: 60,
+    });
+    const rateResult = Array.isArray(rate) ? rate[0] : rate;
+    if (rateError || !rateResult?.allowed) {
+      rateLimited += 1;
+      continue;
+    }
+
     const action = (recommendation.action ?? {}) as Record<string, unknown>;
     const actionType = String(action.action_type ?? action.type ?? "general");
     const category = String(
@@ -159,5 +172,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, executed, queued, skipped, failed });
+  return NextResponse.json({ ok: true, executed, queued, skipped, failed, rate_limited: rateLimited });
 }

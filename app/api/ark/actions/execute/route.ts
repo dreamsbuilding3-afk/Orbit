@@ -36,6 +36,21 @@ export async function POST(request: Request) {
   if (membershipError || !membership?.organization_id) return NextResponse.json({ error: "No workspace found." }, { status: 403 });
   const organizationId = membership.organization_id;
 
+  const { data: rate, error: rateError } = await admin.rpc("check_action_rate_limit", {
+    p_organization_id: organizationId,
+    p_action: "ark.execute",
+    p_limit: 30,
+    p_window_seconds: 60,
+  });
+  if (rateError) return NextResponse.json({ error: "Rate-limit service unavailable." }, { status: 503 });
+  const rateResult = Array.isArray(rate) ? rate[0] : rate;
+  if (!rateResult?.allowed) {
+    return NextResponse.json(
+      { error: "Too many ARK execution requests. Please retry later.", reset_at: rateResult?.reset_at },
+      { status: 429, headers: { "Retry-After": String(Math.max(1, Math.ceil((new Date(rateResult?.reset_at ?? Date.now()).getTime() - Date.now()) / 1000))) } }
+    );
+  }
+
   const { data: recommendation, error: recommendationError } = await admin
     .from("ark_recommendations")
     .select("id,status,action,opportunity_id")
