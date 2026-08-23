@@ -9,14 +9,29 @@ const events = [
 
 export default function ActivityPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#f8f8f8", color: "#111", fontFamily: "Arial, sans-serif", padding: "48px" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <a href="/" style={{ color: "#555", textDecoration: "none" }}>← Back to WineTime</a>
-        <div style={{ marginTop: 48, marginBottom: 32 }}><p style={{ letterSpacing: ".14em", fontSize: 11, color: "#777" }}>TRANSPARENCY</p><h1 style={{ fontSize: 42, margin: "8px 0" }}>Activity</h1><p style={{ color: "#666", fontSize: 16 }}>A clear record of every action WineTime takes.</p></div>
-        <section style={{ background: "rgba(255,255,255,.82)", border: "1px solid #e7e7e7", borderRadius: 22, overflow: "hidden", boxShadow: "0 12px 35px rgba(0,0,0,.035)" }}>
-          {events.map(([title, detail, time, state]) => <div key={title + time} style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "36px 1fr auto", gap: 16, alignItems: "center", borderBottom: "1px solid #eeeeee" }}><span style={{ width: 32, height: 32, borderRadius: 10, border: "1px solid #e3e3e3", display: "grid", placeItems: "center", background: "#fff" }}>✓</span><div><strong>{title}</strong><div style={{ color: "#777", fontSize: 13, marginTop: 4 }}>{detail}</div></div><div style={{ textAlign: "right", color: "#888", fontSize: 12 }}><div>{time}</div><span style={{ color: "#222" }}>{state}</span></div></div>)}
-        </section>
-      </div>
+    <main className="app-shell">
+      <section className="content" style={{ width: "100%" }}>
+        <header className="topbar"><div className="breadcrumbs"><a href="/">Workspace</a><b>/</b><strong>Activity</strong></div><span className="topbar-muted">Transparency</span></header>
+        <div className="page activity-page">
+          <div className="hero-row">
+            <div><p className="eyebrow">TRANSPARENCY</p><h1>Everything WineTime does, clearly.</h1><p className="hero-copy">A calm, readable record of actions, integrations and automated work.</p></div>
+          </div>
+          <section className="glass-card activity-panel">
+            <div className="card-head"><div><h3>Recent activity</h3><p>Latest actions across your connected systems.</p></div><div className="live-pill"><i />Live record</div></div>
+            <div className="activity-list">
+              {events.map(([title, detail, time, state]) => <div key={title + time} className="activity-item">
+                <span className="activity-icon">✓</span>
+                <div className="activity-text"><strong>{title}</strong><span>{detail}</span></div>
+                <div className="activity-meta"><span>{time}</span><b>{state}</b></div>
+              </div>)}
+            </div>
+          </section>
+          <style jsx>{`
+            .activity-page{max-width:1280px;padding-top:52px}.activity-panel{max-width:1100px;min-height:520px}.activity-panel .activity-list{padding:0 18px 18px}.activity-panel .activity-item{padding:20px 12px}.activity-panel .activity-text strong{font-size:12px}.activity-panel .activity-text span{font-size:10px;margin-top:5px}.activity-panel .activity-meta span{font-size:9px}.activity-panel .activity-meta b{font-size:9px;margin-top:5px}.activity-panel .activity-icon{width:36px;height:36px;border-radius:11px}
+            @media(max-width:700px){.activity-page{padding:32px 20px 50px}.activity-panel .activity-item{grid-template-columns:36px minmax(0,1fr);align-items:start}.activity-panel .activity-meta{grid-column:2;text-align:left;margin-top:4px}.activity-panel .activity-text span{white-space:normal}}
+          `}</style>
+        </div>
+      </section>
     </main>
   );
 }
