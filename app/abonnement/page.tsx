@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { WINE_TIME_PLANS } from "@/lib/billing/plans";
 
