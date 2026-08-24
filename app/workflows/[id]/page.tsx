@@ -5,153 +5,47 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-browser";
 
-type Step = { id?: string; position: number; step_type: "trigger" | "condition" | "action"; name: string; description: string | null; config: Record<string, unknown> };
-type Workflow = { id: string; name: string; description: string | null; status: string; trigger_type: string | null };
+type Step={id?:string;position:number;step_type:"trigger"|"condition"|"action";name:string;description:string|null;config:Record<string,unknown>};
+type Workflow={id:string;name:string;description:string|null;status:string;trigger_type:string|null};
+type Run={id:string;status:string;started_at:string;finished_at:string|null;error_message:string|null};
+const fallback:Step[]=[{position:0,step_type:"trigger",name:"Trigger",description:"Choose what starts this workflow.",config:{}},{position:1,step_type:"action",name:"Action",description:"Choose what WineTime should execute.",config:{}}];
 
-const fallback: Step[] = [
-  { position: 0, step_type: "trigger", name: "Trigger", description: "Choose what starts this workflow.", config: {} },
-  { position: 1, step_type: "action", name: "Action", description: "Choose what WineTime should execute.", config: {} },
-];
-
-function applyTemplate(value: string, context: Record<string, string>) {
-  return value.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => context[key.trim()] ?? "");
-}
-
-function base64Url(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  let binary = "";
-  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-export default function WorkflowPage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
-  const [workflow, setWorkflow] = useState<Workflow | null>(null);
-  const [steps, setSteps] = useState<Step[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [running, setRunning] = useState(false);
-  const [message, setMessage] = useState("");
-
-  async function load() {
-    if (!supabase) { setMessage("Supabase n'est pas configuré."); setLoading(false); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setMessage("Connecte-toi à WineTime pour ouvrir ce workflow."); setLoading(false); return; }
-    const { data, error } = await supabase.from("workflows").select("id,name,description,status,trigger_type").eq("id", id).single();
-    if (error) { setMessage(error.message); setLoading(false); return; }
-    const { data: stepData, error: stepError } = await supabase.from("workflow_steps").select("id,position,step_type,name,description,config").eq("workflow_id", id).order("position");
-    if (stepError) setMessage(stepError.message);
-    setWorkflow(data);
-    setSteps(stepData?.length ? stepData : fallback);
-    setLoading(false);
-  }
-
-  useEffect(() => { if (id) load(); }, [id]);
-
-  function updateStep(index: number, patch: Partial<Step>) {
-    setSteps(current => current.map((step, i) => i === index ? { ...step, ...patch } : step));
-  }
-
-  function addStep(type: "condition" | "action") {
-    setSteps(current => [...current, { position: current.length, step_type: type, name: type === "condition" ? "Condition" : "Action", description: "Configure this step.", config: type === "action" ? { app: "Gmail", to: "{{client.email}}", subject: "Welcome", message: "Hello {{client.name}}" } : {} }]);
-  }
-
-  async function save() {
-    if (!supabase || !workflow) return;
-    setSaving(true); setMessage("");
-    const normalized = steps.map((s, position) => ({ position, step_type: s.step_type, name: s.name, description: s.description, config: s.config }));
-    const { error } = await supabase.rpc("save_workflow_steps", { target_workflow: workflow.id, steps: normalized });
-    if (error) setMessage(error.message); else setMessage("Workflow saved in WineTime.");
-    setSaving(false);
-  }
-
-  async function runWorkflow() {
-    if (!supabase || !workflow) return;
-    setRunning(true); setMessage("");
-    let runId: string | null = null;
-    try {
-      const { data: run, error: runError } = await supabase.from("workflow_runs").insert({ workflow_id: workflow.id, status: "running", context: { source: "manual_test" } }).select("id").single();
-      if (runError) throw runError;
-      runId = run.id;
-      const context = { "client.email": "test@example.com", "client.name": "Test Client", "company.name": "WineTime Test" };
-
-      for (const step of steps) {
-        const startedAt = new Date().toISOString();
-        const { data: runStep, error: runStepError } = await supabase.from("workflow_run_steps").insert({ run_id: runId, step_id: step.id ?? null, status: "running", started_at: startedAt }).select("id").single();
-        if (runStepError) throw runStepError;
-
-        try {
-          if (step.step_type === "condition") {
-            await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output: { evaluated: true } }).eq("id", runStep.id);
-            continue;
-          }
-
-          if (step.step_type === "action" && String(step.config.app ?? "").toLowerCase() === "gmail") {
-            const { data: sessionData } = await supabase.auth.getSession();
-            const providerToken = sessionData.session?.provider_token;
-            if (!providerToken) throw new Error("Gmail provider token unavailable. Reconnect Google with Gmail access before running this workflow.");
-            const to = applyTemplate(String(step.config.to ?? ""), context);
-            const subject = applyTemplate(String(step.config.subject ?? ""), context);
-            const body = applyTemplate(String(step.config.message ?? ""), context);
-            if (!to || !subject) throw new Error("Gmail action requires a recipient and subject.");
-            const raw = [
-              `To: ${to}`,
-              "Content-Type: text/plain; charset=utf-8",
-              "MIME-Version: 1.0",
-              `Subject: ${subject}`,
-              "",
-              body,
-            ].join("\r\n");
-            const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${providerToken}`, "Content-Type": "application/json" },
-              body: JSON.stringify({ raw: base64Url(raw) }),
-            });
-            if (!response.ok) throw new Error(`Gmail API error (${response.status}).`);
-            const output = await response.json();
-            await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output }).eq("id", runStep.id);
-            continue;
-          }
-
-          await supabase.from("workflow_run_steps").update({ status: "completed", finished_at: new Date().toISOString(), output: { simulated: true, reason: "No executor configured for this action yet" } }).eq("id", runStep.id);
-        } catch (stepError) {
-          await supabase.from("workflow_run_steps").update({ status: "failed", finished_at: new Date().toISOString(), error_message: stepError instanceof Error ? stepError.message : "Step failed" }).eq("id", runStep.id);
-          throw stepError;
-        }
-      }
-
-      await supabase.from("workflow_runs").update({ status: "completed", finished_at: new Date().toISOString() }).eq("id", runId);
-      setMessage("Workflow executed successfully.");
-    } catch (error) {
-      if (runId) await supabase.from("workflow_runs").update({ status: "failed", finished_at: new Date().toISOString(), error_message: error instanceof Error ? error.message : "Workflow failed" }).eq("id", runId);
-      setMessage(error instanceof Error ? error.message : "Workflow execution failed.");
-    } finally {
-      setRunning(false);
-    }
-  }
-
-  if (loading) return <main className="app-shell"><section className="content"><div className="page"><p>Loading workflow…</p></div></section></main>;
-
-  return <main className="app-shell">
-    <section className="content" style={{ width: "100%" }}>
-      <header className="topbar"><div className="breadcrumbs"><Link href="/workflows">Workflows</Link><b>/</b><strong>{workflow?.name ?? "Workflow"}</strong></div><div style={{ display: "flex", gap: 9 }}><button className="secondary-button" onClick={runWorkflow} disabled={running || saving}>{running ? "Running…" : "Run test"}</button><button className="builder-save" onClick={save} disabled={saving || running}>{saving ? "Saving…" : "Save workflow"}</button></div></header>
-      <div className="page">
-        {!workflow ? <div className="glass-card" style={{ padding: 32 }}>{message || "Workflow not found."}</div> : <>
-          <div className="hero-row"><div><p className="eyebrow">WORKFLOW BUILDER</p><h1>{workflow.name}</h1><p className="hero-copy">{workflow.description || "Connect an event to the work WineTime should execute automatically."}</p></div><span className="status-pill">{workflow.status}</span></div>
-          {message && <div className="glass-card" style={{ padding: 16, marginBottom: 20 }}>{message}</div>}
-          <div className="glass-card" style={{ padding: 28 }}>
-            <div style={{ display: "grid", gap: 14 }}>
-              {steps.map((step, index) => <div key={step.id ?? `${step.position}-${index}`} style={{ display: "grid", gridTemplateColumns: "100px 1fr auto", gap: 16, alignItems: "center", padding: 18, border: "1px solid rgba(0,0,0,.08)", borderRadius: 18, background: "rgba(255,255,255,.72)" }}>
-                <span className="eyebrow">{step.step_type.toUpperCase()}</span>
-                <div><input value={step.name} onChange={e => updateStep(index, { name: e.target.value })} style={{ width: "100%", border: 0, outline: 0, background: "transparent", fontSize: 18, fontWeight: 650 }} /><p style={{ margin: "6px 0 0", opacity: .58 }}>{step.description}</p></div>
-                <span style={{ opacity: .4 }}>{index + 1}</span>
-              </div>)}
-            </div>
-            <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}><button className="secondary-button" onClick={() => addStep("condition")}>+ Condition</button><button className="secondary-button" onClick={() => addStep("action")}>+ Action</button></div>
-          </div>
-        </>}
-      </div>
-    </section>
-  </main>;
+export default function WorkflowPage(){
+ const {id}=useParams<{id:string}>(); const [workflow,setWorkflow]=useState<Workflow|null>(null); const [steps,setSteps]=useState<Step[]>([]); const [runs,setRuns]=useState<Run[]>([]); const [loading,setLoading]=useState(true); const [saving,setSaving]=useState(false); const [running,setRunning]=useState(false); const [message,setMessage]=useState("");
+ async function load(){
+  if(!supabase){setMessage("Supabase n'est pas configuré.");setLoading(false);return;}
+  const {data:{user}}=await supabase.auth.getUser(); if(!user){setMessage("Connecte-toi à WineTime pour ouvrir ce workflow.");setLoading(false);return;}
+  const {data,error}=await supabase.from("workflows").select("id,name,description,status,trigger_type").eq("id",id).single(); if(error){setMessage(error.message);setLoading(false);return;}
+  const [stepResult,runResult]=await Promise.all([supabase.from("workflow_steps").select("id,position,step_type,name,description,config").eq("workflow_id",id).order("position"),supabase.from("workflow_runs").select("id,status,started_at,finished_at,error_message").eq("workflow_id",id).order("started_at",{ascending:false}).limit(8)]);
+  if(stepResult.error)setMessage(stepResult.error.message); if(runResult.error)setMessage(runResult.error.message); setWorkflow(data);setSteps(stepResult.data?.length?stepResult.data:fallback);setRuns(runResult.data??[]);setLoading(false);
+ }
+ useEffect(()=>{if(id)void load();},[id]);
+ function updateStep(index:number,patch:Partial<Step>){setSteps(c=>c.map((s,i)=>i===index?{...s,...patch}:s));}
+ function addStep(type:"condition"|"action"){setSteps(c=>[...c,{position:c.length,step_type:type,name:type==="condition"?"Condition":"Action",description:"Configure this step before saving.",config:{}}]);}
+ async function save(){if(!supabase||!workflow)return;setSaving(true);setMessage("");const normalized=steps.map((s,position)=>({position,step_type:s.step_type,name:s.name,description:s.description,config:s.config}));const {error}=await supabase.rpc("save_workflow_steps",{target_workflow:workflow.id,steps:normalized});setMessage(error?error.message:"Workflow saved in WineTime.");setSaving(false);if(!error)void load();}
+ async function runWorkflow(){
+  if(!supabase||!workflow)return;setRunning(true);setMessage("");let runId:string|null=null;
+  try{
+   const {data:run,error:runError}=await supabase.from("workflow_runs").insert({workflow_id:workflow.id,status:"running",context:{source:"manual_test"}}).select("id").single();if(runError)throw runError;runId=run.id;
+   for(const step of steps){const {data:runStep,error:e}=await supabase.from("workflow_run_steps").insert({run_id:runId,step_id:step.id??null,status:"running",started_at:new Date().toISOString()}).select("id").single();if(e)throw e;
+    if(step.step_type==="condition"){await supabase.from("workflow_run_steps").update({status:"completed",finished_at:new Date().toISOString(),output:{validated:true}}).eq("id",runStep.id);continue;}
+    if(step.step_type==="action"){await supabase.from("workflow_run_steps").update({status:"completed",finished_at:new Date().toISOString(),output:{test:true,execution:"server_executor_required"}}).eq("id",runStep.id);continue;}
+    await supabase.from("workflow_run_steps").update({status:"completed",finished_at:new Date().toISOString(),output:{validated:true}}).eq("id",runStep.id);
+   }
+   await supabase.from("workflow_runs").update({status:"completed",finished_at:new Date().toISOString()}).eq("id",runId);setMessage("Test run completed. No external action was sent.");
+  }catch(error){if(runId)await supabase.from("workflow_runs").update({status:"failed",finished_at:new Date().toISOString(),error_message:error instanceof Error?error.message:"Workflow failed"}).eq("id",runId);setMessage(error instanceof Error?error.message:"Workflow execution failed.");}finally{setRunning(false);void load();}
+ }
+ if(loading)return <main className="app-shell"><section className="content"><div className="page"><p>Loading workflow…</p></div></section></main>;
+ return <main className="app-shell"><section className="content" style={{width:"100%"}}>
+  <header className="topbar"><div className="breadcrumbs"><Link href="/workflows">Workflows</Link><b>/</b><strong>{workflow?.name??"Workflow"}</strong></div><div className="actions"><button className="secondary-button" onClick={runWorkflow} disabled={running||saving}>{running?"Testing…":"Run test"}</button><button className="builder-save" onClick={save} disabled={saving||running}>{saving?"Saving…":"Save workflow"}</button></div></header>
+  <div className="page builder-page">{!workflow?<div className="glass-card empty">{message||"Workflow not found."}</div>:<>
+   <div className="hero-row"><div><p className="eyebrow">WORKFLOW BUILDER</p><h1>{workflow.name}</h1><p className="hero-copy">{workflow.description||"Connect an event to the work WineTime should execute automatically."}</p></div><span className="status-pill">{workflow.status}</span></div>
+   <div className="journey"><div><b>01</b><strong>Trigger</strong><span>What starts the workflow</span></div><div><b>02</b><strong>Conditions</strong><span>What must be true</span></div><div><b>03</b><strong>Actions</strong><span>What WineTime executes</span></div><div><b>04</b><strong>Review</strong><span>Test before going live</span></div></div>
+   {message&&<div className="glass-card notice">{message}</div>}
+   <section className="glass-card builder-card"><div className="section-head"><div><p className="eyebrow">FLOW</p><h2>Build the workflow step by step.</h2></div><span>{steps.length} steps</span></div><div className="steps">{steps.map((step,index)=><div className="step" key={step.id??`${step.position}-${index}`}><div className={`step-number ${step.step_type}`}>{index+1}</div><div className="step-body"><span className="eyebrow">{step.step_type}</span><input value={step.name} onChange={e=>updateStep(index,{name:e.target.value})}/><p>{step.description}</p></div><span className="step-arrow">→</span></div>)}</div><div className="step-actions"><button className="secondary-button" onClick={()=>addStep("condition")}>+ Add condition</button><button className="secondary-button" onClick={()=>addStep("action")}>+ Add action</button></div></section>
+   <section className="glass-card runs-card"><div className="section-head"><div><p className="eyebrow">RUN HISTORY</p><h2>Recent tests and executions.</h2></div><Link href="/activity">View activity →</Link></div>{runs.length===0?<div className="empty-small">No runs yet. Use <b>Run test</b> to validate the flow before activating it.</div>:<div className="run-list">{runs.map(run=><div className="run" key={run.id}><i className={`dot ${run.status}`}/><div><strong>{run.status}</strong><span>{new Date(run.started_at).toLocaleString("fr-FR")}</span></div><small>{run.error_message||"No error recorded"}</small></div>)}</div>}</section>
+   <div className="safety-note">Tests are non-destructive. External actions require the server-side executor and the permissions granted to this organization.</div>
+  </>}</div>
+  <style jsx>{`.builder-page{max-width:1280px;padding-top:48px;padding-bottom:80px}.actions{display:flex;gap:9px}.journey{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:28px 0 16px}.journey>div{padding:17px;border:1px solid rgba(0,0,0,.07);border-radius:15px;background:rgba(255,255,255,.65)}.journey b{display:block;font-size:9px;color:#aaa}.journey strong{display:block;margin-top:8px;font-size:12px}.journey span{display:block;margin-top:5px;color:#888;font-size:10px}.notice{padding:15px;margin-bottom:16px}.builder-card,.runs-card{padding:26px;margin-top:16px}.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:20px}.section-head h2{margin:6px 0 0;font-size:20px;letter-spacing:-.03em}.section-head>span,.section-head>a{font-size:10px;color:#999}.steps{display:grid;gap:10px}.step{display:grid;grid-template-columns:42px 1fr auto;gap:15px;align-items:center;padding:18px;border:1px solid rgba(0,0,0,.07);border-radius:16px;background:rgba(255,255,255,.72)}.step-number{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#f0f0ef;font-weight:700}.step-number.trigger{background:#111;color:#fff}.step-body input{display:block;width:100%;border:0;outline:0;background:transparent;font-size:17px;font-weight:650;margin-top:6px}.step-body p{margin:5px 0 0;color:#888;font-size:10px}.step-arrow{color:#bbb}.step-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}.run-list{display:grid}.run{display:grid;grid-template-columns:10px 180px 1fr;gap:12px;align-items:center;padding:15px 4px;border-top:1px solid rgba(0,0,0,.06)}.run .dot{width:7px;height:7px;border-radius:50%;background:#999}.run .dot.completed{background:#111}.run .dot.failed{background:#8a2222}.run strong{display:block;font-size:11px}.run span,.run small{color:#999;font-size:9px}.empty,.empty-small{text-align:center;color:#888;padding:55px}.safety-note{text-align:center;color:#aaa;font-size:9px;margin:18px auto;max-width:700px}@media(max-width:800px){.journey{grid-template-columns:1fr 1fr}.run{grid-template-columns:10px 1fr}.run small{grid-column:2}.actions{gap:6px}.builder-page{padding:32px 20px 55px}}@media(max-width:520px){.journey{grid-template-columns:1fr}.step{grid-template-columns:36px 1fr}.step-arrow{display:none}.actions .secondary-button{display:none}}`}</style>
+ </section></main>;
 }
