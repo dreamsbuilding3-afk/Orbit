@@ -12,8 +12,9 @@ export async function POST(request: Request) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) return NextResponse.json({ error: "Missing access token." }, { status: 401 });
 
-  const body = await request.json().catch(() => null) as { providerRefreshToken?: string } | null;
+  const body = await request.json().catch(() => null) as { providerRefreshToken?: string; organizationId?: string } | null;
   if (!body?.providerRefreshToken) return NextResponse.json({ error: "Missing Google refresh token." }, { status: 400 });
+  if (!body.organizationId) return NextResponse.json({ error: "Missing organization context." }, { status: 400 });
 
   const admin = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false } });
   const { data: { user }, error: userError } = await admin.auth.getUser(token);
@@ -21,11 +22,13 @@ export async function POST(request: Request) {
 
   const { data: membership, error: membershipError } = await admin
     .from("organization_members")
-    .select("organization_id")
+    .select("organization_id, role")
+    .eq("organization_id", body.organizationId)
     .eq("user_id", user.id)
-    .limit(1)
     .maybeSingle();
-  if (membershipError || !membership?.organization_id) return NextResponse.json({ error: "No workspace found." }, { status: 403 });
+  if (membershipError || !membership || !["owner", "admin"].includes(membership.role)) {
+    return NextResponse.json({ error: "Organization access denied." }, { status: 403 });
+  }
 
   let encrypted: string;
   try {
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
   const { data: connection, error: loadError } = await admin
     .from("integration_connections")
     .select("metadata")
-    .eq("organization_id", membership.organization_id)
+    .eq("organization_id", body.organizationId)
     .eq("provider", "gmail")
     .maybeSingle();
   if (loadError) return NextResponse.json({ error: loadError.message }, { status: 500 });
@@ -49,11 +52,13 @@ export async function POST(request: Request) {
   const { error: saveError } = await admin
     .from("integration_connections")
     .upsert({
-      organization_id: membership.organization_id,
+      organization_id: body.organizationId,
       provider: "gmail",
       status: "connected",
       account_label: user.email ?? "Google account",
       metadata,
+      granted_by: user.id,
+      revoked_at: null,
       last_error: null,
     }, { onConflict: "organization_id,provider" });
 
