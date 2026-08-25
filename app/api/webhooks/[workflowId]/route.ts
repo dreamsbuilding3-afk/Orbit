@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (!supabase) return NextResponse.json({ error: "Supabase is not configured." }, { status: 500 });
 
   const { workflowId } = await params;
-  const secret = request.headers.get("x-orbit-webhook-secret") || request.nextUrl.searchParams.get("secret");
+  const secret = request.headers.get("x-orbit-webhook-secret");
   if (!secret) return NextResponse.json({ error: "Missing webhook secret." }, { status: 401 });
 
   let payload: Record<string, unknown> = {};
@@ -43,12 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     p_payload: payload,
   });
 
-  return NextResponse.json({
-    accepted: true,
-    run_id: runId,
-    ark_event_recorded: !eventError,
-    status: "queued",
-  }, { status: 202 });
+  return NextResponse.json({ accepted: true, run_id: runId, ark_event_recorded: !eventError, status: "queued" }, { status: 202 });
 }
 
 export async function GET(_request: NextRequest) {
