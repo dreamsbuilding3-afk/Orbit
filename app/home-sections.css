@@ -1,0 +1,8 @@
+/* WineTime home — premium continuation for the intelligence/activity section */
+.intel-strip{position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.06);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.84),rgba(247,247,246,.64));box-shadow:0 22px 60px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.96);padding:25px 26px;display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:42px}
+.intel-strip:before{content:"";position:absolute;right:-100px;top:-150px;width:330px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.96),rgba(255,255,255,0));filter:blur(10px);pointer-events:none}
+.intel-strip>div{position:relative;z-index:1;max-width:690px}.intel-strip h2{margin:0;font-size:20px;line-height:1.18;letter-spacing:-.035em;font-weight:600}.intel-strip p:not(.eyebrow){margin:8px 0 0;color:#969694;font-size:10px;line-height:1.55;max-width:620px}.intel-strip .outline-button{position:relative;z-index:1;white-space:nowrap}
+.metrics{position:relative;z-index:1}.metric-card{transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.metric-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.86);box-shadow:0 24px 60px rgba(0,0,0,.06)}
+.activity-card,.orbit-card{transition:box-shadow .2s ease,transform .2s ease}.activity-card:hover,.orbit-card:hover{box-shadow:0 26px 70px rgba(0,0,0,.06)}
+@media(max-width:900px){.intel-strip{align-items:flex-start;flex-direction:column}.intel-strip .outline-button{margin-left:0}}
+@media(max-width:700px){.intel-strip{padding:21px}.intel-strip h2{font-size:18px}.intel-strip .outline-button{width:100%;justify-content:center}}
