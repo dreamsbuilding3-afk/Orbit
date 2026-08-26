@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./responsive.css";
 import "./hero-motion.css";
+import "./hero-motion-tuning.css";
 import SubscriptionLink from "./subscription-link";
 
 export const metadata: Metadata = {
