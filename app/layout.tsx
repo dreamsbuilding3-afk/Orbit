@@ -4,6 +4,7 @@ import "./responsive.css";
 import "./hero-motion.css";
 import "./hero-motion-tuning.css";
 import "./home-polish.css";
+import "./home-sections.css";
 import "./subscription-link";
 
 export const metadata: Metadata = {
