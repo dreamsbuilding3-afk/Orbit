@@ -1,0 +1,89 @@
+/* WineTime hero motion — V3: visible 3D/glass presence without breaking the white system. */
+.hero-row { min-height: 300px !important; }
+.hero-visual {
+  width: 500px !important;
+  height: 350px !important;
+  right: 10px !important;
+  top: -42px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  z-index: 2 !important;
+  transform: scale(1.12) !important;
+}
+.hero-glow {
+  width: 310px !important;
+  height: 310px !important;
+  background: radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(210,210,207,.72) 28%, rgba(190,190,186,.22) 52%, rgba(255,255,255,0) 76%) !important;
+  filter: blur(2px) !important;
+  animation: heroBreathV3 6s ease-in-out infinite !important;
+}
+.hero-core {
+  width: 154px !important;
+  height: 154px !important;
+  border-radius: 42px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(215,215,212,.9) 48%, rgba(249,249,248,.98)) !important;
+  border: 1px solid rgba(55,55,53,.2) !important;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.98), inset -18px -22px 40px rgba(130,130,126,.12), 0 22px 55px rgba(0,0,0,.14), 0 0 0 14px rgba(255,255,255,.34) !important;
+  transform: translateZ(40px) rotateX(7deg) rotateY(-9deg) !important;
+  animation: heroCoreV3 8s ease-in-out infinite !important;
+}
+.hero-core span {
+  color: #171717 !important;
+  font-size: 78px !important;
+  line-height: 1 !important;
+  font-weight: 500 !important;
+  letter-spacing: -.12em !important;
+  transform: translateX(-3px) translateY(-2px) !important;
+  text-shadow: 0 1px 0 #fff, 0 10px 20px rgba(0,0,0,.10) !important;
+}
+.hero-orbit {
+  width: 360px !important;
+  height: 168px !important;
+  border-width: 2px !important;
+  border-color: rgba(45,45,43,.48) !important;
+  opacity: 1 !important;
+  box-shadow: inset 0 0 25px rgba(255,255,255,.95), 0 15px 40px rgba(0,0,0,.08) !important;
+}
+.hero-orbit-a { animation: heroOrbitAV3 10s linear infinite !important; }
+.hero-orbit-b {
+  width: 310px !important;
+  height: 142px !important;
+  border-color: rgba(65,65,62,.38) !important;
+  animation: heroOrbitBV3 13s linear infinite reverse !important;
+}
+.hero-orbit-c {
+  width: 260px !important;
+  height: 118px !important;
+  border-color: rgba(85,85,82,.30) !important;
+  animation: heroOrbitCV3 8s linear infinite !important;
+}
+.hero-sphere {
+  width: 18px !important;
+  height: 18px !important;
+  background: radial-gradient(circle at 32% 28%, #fff 0%, #d2d2cf 46%, #8d8d89 100%) !important;
+  border: 1px solid rgba(30,30,28,.25) !important;
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,.9), 0 8px 18px rgba(0,0,0,.14) !important;
+  opacity: 1 !important;
+}
+.hero-sphere-a { animation: heroSphereAV3 5.5s ease-in-out infinite !important; }
+.hero-sphere-b { animation: heroSphereBV3 7s ease-in-out infinite !important; }
+.hero-sphere-c { animation: heroSphereCV3 6.5s ease-in-out infinite !important; }
+.hero-actions { position: relative !important; z-index: 6 !important; }
+.hero-copy-block { position: relative !important; z-index: 5 !important; }
+@keyframes heroBreathV3 { 0%,100% { transform: scale(.94); opacity:.72 } 50% { transform: scale(1.08); opacity:1 } }
+@keyframes heroCoreV3 { 0%,100% { transform: translateZ(40px) rotateX(7deg) rotateY(-9deg) translateY(0) } 50% { transform: translateZ(40px) rotateX(10deg) rotateY(-14deg) translateY(-8px) } }
+@keyframes heroOrbitAV3 { from { transform: rotateX(68deg) rotateZ(12deg) rotate(0deg) } to { transform: rotateX(68deg) rotateZ(12deg) rotate(360deg) } }
+@keyframes heroOrbitBV3 { from { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(0deg) } to { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(-360deg) } }
+@keyframes heroOrbitCV3 { from { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(0deg) } to { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(360deg) } }
+@keyframes heroSphereAV3 { 0%,100% { transform: translate(170px,-52px) scale(1) } 50% { transform: translate(124px,66px) scale(1.15) } }
+@keyframes heroSphereBV3 { 0%,100% { transform: translate(-154px,38px) scale(.92) } 50% { transform: translate(-78px,-66px) scale(1.12) } }
+@keyframes heroSphereCV3 { 0%,100% { transform: translate(102px,86px) scale(.88) } 50% { transform: translate(-106px,-22px) scale(1.08) } }
+@media (max-width: 900px) {
+  .hero-row { min-height: 390px !important; }
+  .hero-visual { width: 430px !important; height: 310px !important; right: 50% !important; top: 105px !important; transform: translateX(50%) scale(.88) !important; opacity: .78 !important; }
+  .hero-copy-block { z-index: 5 !important; }
+  .hero-actions { z-index: 6 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow,.hero-core,.hero-orbit,.hero-sphere { animation:none !important; }
+}
