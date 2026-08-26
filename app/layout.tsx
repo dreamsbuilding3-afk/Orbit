@@ -5,7 +5,7 @@ import "./hero-motion.css";
 import "./hero-motion-tuning.css";
 import "./home-polish.css";
 import "./home-sections.css";
-import "./subscription-link";
+import SubscriptionLink from "./subscription-link";
 
 export const metadata: Metadata = {
   title: "WineTime — Business automation",
