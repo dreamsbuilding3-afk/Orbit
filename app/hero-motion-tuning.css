@@ -1,0 +1,9 @@
+/* WineTime hero motion — final visibility tuning. Keep the sculpture behind the glass UI, just a touch more visible. */
+.hero-visual { opacity: .52 !important; }
+.hero-glow { opacity: .52 !important; }
+.hero-core span { color: rgba(255,255,255,.62) !important; -webkit-text-stroke-color: rgba(55,55,52,.21) !important; }
+.hero-orbit { opacity: .84 !important; }
+.hero-sphere { opacity: .96 !important; }
+@media (max-width: 900px) {
+  .hero-visual { opacity: .36 !important; }
+}
