@@ -3,7 +3,8 @@ import "./globals.css";
 import "./responsive.css";
 import "./hero-motion.css";
 import "./hero-motion-tuning.css";
-import SubscriptionLink from "./subscription-link";
+import "./home-polish.css";
+import "./subscription-link";
 
 export const metadata: Metadata = {
   title: "WineTime — Business automation",
