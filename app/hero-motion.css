@@ -1,49 +1,69 @@
-/* WineTime hero motion — V4: glass W sculpture, orbital system, no badge/card look. */
-.hero-row { min-height: 330px !important; }
+/* WineTime hero motion — V5: background glass object, never above the interface. */
+.hero-row {
+  position: relative !important;
+  min-height: 330px !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+/* The motion lives behind the hero content. It must feel like atmosphere, not a card/logo. */
+.hero-copy-block,
+.hero-actions {
+  position: relative !important;
+  z-index: 3 !important;
+}
 
 .hero-visual {
-  width: 560px !important;
-  height: 360px !important;
-  right: 0 !important;
-  top: -48px !important;
+  width: 520px !important;
+  height: 325px !important;
+  right: 8px !important;
+  top: -34px !important;
   overflow: visible !important;
-  z-index: 2 !important;
-  transform: none !important;
-  filter: drop-shadow(0 28px 48px rgba(0,0,0,.035)) !important;
+  z-index: 0 !important;
+  opacity: .42 !important;
+  transform: translateZ(0) !important;
+  filter: blur(.15px) drop-shadow(0 24px 42px rgba(0,0,0,.025)) !important;
 }
 
 .hero-glow {
-  width: 340px !important;
-  height: 340px !important;
-  background: radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(228,228,225,.70) 30%, rgba(205,205,201,.18) 56%, rgba(255,255,255,0) 76%) !important;
-  filter: blur(4px) !important;
-  animation: heroBreathV4 7s ease-in-out infinite !important;
+  width: 330px !important;
+  height: 330px !important;
+  background: radial-gradient(circle, rgba(255,255,255,.90) 0%, rgba(224,224,221,.30) 34%, rgba(255,255,255,0) 74%) !important;
+  filter: blur(10px) !important;
+  animation: heroBreathV5 8s ease-in-out infinite !important;
 }
 
 .hero-core {
-  width: 210px !important;
-  height: 235px !important;
+  width: 185px !important;
+  height: 205px !important;
   border-radius: 0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
   transform-style: preserve-3d !important;
-  transform: translateZ(30px) rotateX(4deg) rotateY(-7deg) !important;
-  animation: heroCoreV4 8s ease-in-out infinite !important;
+  transform: translateZ(24px) rotateX(4deg) rotateY(-7deg) !important;
+  animation: heroCoreV5 9s ease-in-out infinite !important;
 }
 
+/* Soft glass pedestal, intentionally recessed. */
 .hero-core::before {
   content: "" !important;
   position: absolute !important;
   left: 50% !important;
-  bottom: -36px !important;
-  width: 245px !important;
-  height: 52px !important;
+  bottom: -18px !important;
+  width: 205px !important;
+  height: 34px !important;
   transform: translateX(-50%) perspective(180px) rotateX(55deg) !important;
   border-radius: 50% !important;
-  background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(218,218,215,.38)) !important;
-  border: 1px solid rgba(80,80,77,.16) !important;
-  box-shadow: 0 18px 38px rgba(0,0,0,.10), inset 0 2px 0 rgba(255,255,255,.95) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(218,218,215,.12)) !important;
+  border: 1px solid rgba(70,70,67,.10) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.045), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+
+/* No rounded rectangle/card around the W. */
+.hero-core::after {
+  display: none !important;
+  content: none !important;
 }
 
 .hero-core span {
@@ -51,68 +71,111 @@
   inset: 0 !important;
   display: grid !important;
   place-items: center !important;
-  color: rgba(255,255,255,.72) !important;
-  font-size: 174px !important;
+  color: rgba(255,255,255,.52) !important;
+  font-size: 150px !important;
   line-height: .82 !important;
   font-weight: 300 !important;
   letter-spacing: -.18em !important;
   transform: translateX(-5px) translateY(-6px) scaleX(.9) !important;
-  -webkit-text-stroke: 1.25px rgba(76,76,73,.25) !important;
-  text-shadow: 0 1px 0 rgba(255,255,255,.98), 2px 4px 0 rgba(210,210,207,.42), 8px 16px 28px rgba(0,0,0,.10) !important;
-}
-
-.hero-core::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 20px 30px 10px !important;
-  border: 1px solid rgba(255,255,255,.42) !important;
-  border-radius: 28px !important;
-  opacity: .24 !important;
-  pointer-events: none !important;
+  -webkit-text-stroke: 1.15px rgba(55,55,52,.17) !important;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.96),
+    2px 4px 0 rgba(210,210,207,.24),
+    8px 16px 28px rgba(0,0,0,.055) !important;
 }
 
 .hero-orbit {
-  width: 410px !important;
-  height: 175px !important;
-  border-width: 1.35px !important;
-  border-color: rgba(85,85,82,.24) !important;
-  opacity: .9 !important;
-  box-shadow: inset 0 0 28px rgba(255,255,255,.96), 0 18px 42px rgba(0,0,0,.045) !important;
+  width: 390px !important;
+  height: 164px !important;
+  border-width: 1.15px !important;
+  border-color: rgba(80,80,77,.17) !important;
+  opacity: .72 !important;
+  box-shadow: inset 0 0 26px rgba(255,255,255,.92), 0 15px 34px rgba(0,0,0,.025) !important;
 }
-.hero-orbit-a { animation: heroOrbitAV4 13s linear infinite !important; }
-.hero-orbit-b { width: 350px !important; height: 150px !important; border-color: rgba(90,90,87,.20) !important; animation: heroOrbitBV4 17s linear infinite reverse !important; }
-.hero-orbit-c { width: 300px !important; height: 126px !important; border-color: rgba(100,100,97,.16) !important; animation: heroOrbitCV4 11s linear infinite !important; }
+.hero-orbit-a { animation: heroOrbitAV5 14s linear infinite !important; }
+.hero-orbit-b {
+  width: 330px !important;
+  height: 142px !important;
+  border-color: rgba(85,85,82,.14) !important;
+  animation: heroOrbitBV5 18s linear infinite reverse !important;
+}
+.hero-orbit-c {
+  width: 282px !important;
+  height: 118px !important;
+  border-color: rgba(95,95,92,.11) !important;
+  animation: heroOrbitCV5 12s linear infinite !important;
+}
 
 .hero-sphere {
-  width: 15px !important;
-  height: 15px !important;
-  background: radial-gradient(circle at 30% 25%, #fff 0%, #e1e1de 48%, #aaa9a5 100%) !important;
-  border: 1px solid rgba(75,75,72,.16) !important;
-  box-shadow: inset 2px 2px 5px rgba(255,255,255,.95), 0 9px 20px rgba(0,0,0,.10) !important;
+  width: 11px !important;
+  height: 11px !important;
+  background: radial-gradient(circle at 30% 25%, #fff 0%, #e1e1de 52%, #b4b3af 100%) !important;
+  border: 1px solid rgba(65,65,62,.11) !important;
+  box-shadow: inset 2px 2px 4px rgba(255,255,255,.95), 0 7px 15px rgba(0,0,0,.055) !important;
 }
-.hero-sphere-a { animation: heroSphereAV4 6.5s ease-in-out infinite !important; }
-.hero-sphere-b { animation: heroSphereBV4 8s ease-in-out infinite !important; }
-.hero-sphere-c { animation: heroSphereCV4 7.2s ease-in-out infinite !important; }
+.hero-sphere-a { animation: heroSphereAV5 7s ease-in-out infinite !important; }
+.hero-sphere-b { animation: heroSphereBV5 8.5s ease-in-out infinite !important; }
+.hero-sphere-c { animation: heroSphereCV5 7.6s ease-in-out infinite !important; }
 
+/* Keep the metric label factual without making the motion compete with it. */
 .metrics .metric-card:nth-child(3) strong { font-size: 0 !important; }
-.metrics .metric-card:nth-child(3) strong::after { content: "ARK" !important; font-size: 24px !important; letter-spacing: -.04em !important; font-weight: 650 !important; }
+.metrics .metric-card:nth-child(3) strong::after {
+  content: "ARK" !important;
+  font-size: 24px !important;
+  letter-spacing: -.04em !important;
+  font-weight: 650 !important;
+}
 
-@keyframes heroBreathV4 { 0%,100% { transform: scale(.94); opacity: .68; } 50% { transform: scale(1.06); opacity: .95; } }
-@keyframes heroCoreV4 { 0%,100% { transform: translateZ(30px) rotateX(4deg) rotateY(-7deg) translateY(0); } 50% { transform: translateZ(30px) rotateX(7deg) rotateY(-11deg) translateY(-7px); } }
-@keyframes heroOrbitAV4 { from { transform: rotateX(68deg) rotateZ(12deg) rotate(0deg); } to { transform: rotateX(68deg) rotateZ(12deg) rotate(360deg); } }
-@keyframes heroOrbitBV4 { from { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(0deg); } to { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(-360deg); } }
-@keyframes heroOrbitCV4 { from { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(0deg); } to { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(360deg); } }
-@keyframes heroSphereAV4 { 0%,100% { transform: translate(192px,-62px) scale(1); } 50% { transform: translate(138px,78px) scale(1.12); } }
-@keyframes heroSphereBV4 { 0%,100% { transform: translate(-174px,44px) scale(.92); } 50% { transform: translate(-86px,-76px) scale(1.10); } }
-@keyframes heroSphereCV4 { 0%,100% { transform: translate(116px,94px) scale(.88); } 50% { transform: translate(-118px,-24px) scale(1.06); } }
+@keyframes heroBreathV5 {
+  0%,100% { transform: scale(.96); opacity: .38; }
+  50% { transform: scale(1.04); opacity: .60; }
+}
+@keyframes heroCoreV5 {
+  0%,100% { transform: translateZ(24px) rotateX(4deg) rotateY(-7deg) translateY(0); }
+  50% { transform: translateZ(24px) rotateX(6deg) rotateY(-10deg) translateY(-5px); }
+}
+@keyframes heroOrbitAV5 {
+  from { transform: rotateX(68deg) rotateZ(12deg) rotate(0deg); }
+  to { transform: rotateX(68deg) rotateZ(12deg) rotate(360deg); }
+}
+@keyframes heroOrbitBV5 {
+  from { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(0deg); }
+  to { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(-360deg); }
+}
+@keyframes heroOrbitCV5 {
+  from { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(0deg); }
+  to { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(360deg); }
+}
+@keyframes heroSphereAV5 {
+  0%,100% { transform: translate(182px,-56px) scale(1); }
+  50% { transform: translate(132px,70px) scale(1.08); }
+}
+@keyframes heroSphereBV5 {
+  0%,100% { transform: translate(-164px,42px) scale(.94); }
+  50% { transform: translate(-82px,-70px) scale(1.06); }
+}
+@keyframes heroSphereCV5 {
+  0%,100% { transform: translate(110px,86px) scale(.90); }
+  50% { transform: translate(-110px,-22px) scale(1.04); }
+}
 
 @media (max-width: 1180px) {
-  .hero-visual { width: 100% !important; height: 300px !important; margin: 0 !important; right: auto !important; top: auto !important; }
+  .hero-visual {
+    width: 100% !important;
+    height: 290px !important;
+    right: auto !important;
+    top: -18px !important;
+  }
 }
 @media (max-width: 900px) {
-  .hero-row { min-height: 410px !important; }
-  .hero-visual { width: 100% !important; height: 260px !important; margin: 8px 0 -4px !important; opacity: .86 !important; }
-  .hero-core { transform: scale(.84) translateZ(20px) rotateX(4deg) rotateY(-7deg) !important; }
+  .hero-row { min-height: 400px !important; }
+  .hero-visual {
+    width: 100% !important;
+    height: 250px !important;
+    margin: 8px 0 -4px !important;
+    opacity: .30 !important;
+  }
+  .hero-core { transform: scale(.80) translateZ(18px) rotateX(4deg) rotateY(-7deg) !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-glow,.hero-core,.hero-orbit,.hero-sphere { animation: none !important; }
