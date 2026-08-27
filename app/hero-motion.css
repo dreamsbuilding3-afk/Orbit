@@ -1,183 +1,28 @@
-/* WineTime hero motion — V5: background glass object, never above the interface. */
-.hero-row {
-  position: relative !important;
-  min-height: 330px !important;
-  overflow: hidden !important;
-  isolation: isolate !important;
-}
-
-/* The motion lives behind the hero content. It must feel like atmosphere, not a card/logo. */
-.hero-copy-block,
-.hero-actions {
-  position: relative !important;
-  z-index: 3 !important;
-}
-
-.hero-visual {
-  width: 520px !important;
-  height: 325px !important;
-  right: 8px !important;
-  top: -34px !important;
-  overflow: visible !important;
-  z-index: 0 !important;
-  opacity: .42 !important;
-  transform: translateZ(0) !important;
-  filter: blur(.15px) drop-shadow(0 24px 42px rgba(0,0,0,.025)) !important;
-}
-
-.hero-glow {
-  width: 330px !important;
-  height: 330px !important;
-  background: radial-gradient(circle, rgba(255,255,255,.90) 0%, rgba(224,224,221,.30) 34%, rgba(255,255,255,0) 74%) !important;
-  filter: blur(10px) !important;
-  animation: heroBreathV5 8s ease-in-out infinite !important;
-}
-
-.hero-core {
-  width: 185px !important;
-  height: 205px !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  transform-style: preserve-3d !important;
-  transform: translateZ(24px) rotateX(4deg) rotateY(-7deg) !important;
-  animation: heroCoreV5 9s ease-in-out infinite !important;
-}
-
-/* Soft glass pedestal, intentionally recessed. */
-.hero-core::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 50% !important;
-  bottom: -18px !important;
-  width: 205px !important;
-  height: 34px !important;
-  transform: translateX(-50%) perspective(180px) rotateX(55deg) !important;
-  border-radius: 50% !important;
-  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(218,218,215,.12)) !important;
-  border: 1px solid rgba(70,70,67,.10) !important;
-  box-shadow: 0 12px 28px rgba(0,0,0,.045), inset 0 1px 0 rgba(255,255,255,.9) !important;
-}
-
-/* No rounded rectangle/card around the W. */
-.hero-core::after {
-  display: none !important;
-  content: none !important;
-}
-
-.hero-core span {
-  position: absolute !important;
-  inset: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: rgba(255,255,255,.52) !important;
-  font-size: 150px !important;
-  line-height: .82 !important;
-  font-weight: 300 !important;
-  letter-spacing: -.18em !important;
-  transform: translateX(-5px) translateY(-6px) scaleX(.9) !important;
-  -webkit-text-stroke: 1.15px rgba(55,55,52,.17) !important;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,.96),
-    2px 4px 0 rgba(210,210,207,.24),
-    8px 16px 28px rgba(0,0,0,.055) !important;
-}
-
-.hero-orbit {
-  width: 390px !important;
-  height: 164px !important;
-  border-width: 1.15px !important;
-  border-color: rgba(80,80,77,.17) !important;
-  opacity: .72 !important;
-  box-shadow: inset 0 0 26px rgba(255,255,255,.92), 0 15px 34px rgba(0,0,0,.025) !important;
-}
-.hero-orbit-a { animation: heroOrbitAV5 14s linear infinite !important; }
-.hero-orbit-b {
-  width: 330px !important;
-  height: 142px !important;
-  border-color: rgba(85,85,82,.14) !important;
-  animation: heroOrbitBV5 18s linear infinite reverse !important;
-}
-.hero-orbit-c {
-  width: 282px !important;
-  height: 118px !important;
-  border-color: rgba(95,95,92,.11) !important;
-  animation: heroOrbitCV5 12s linear infinite !important;
-}
-
-.hero-sphere {
-  width: 11px !important;
-  height: 11px !important;
-  background: radial-gradient(circle at 30% 25%, #fff 0%, #e1e1de 52%, #b4b3af 100%) !important;
-  border: 1px solid rgba(65,65,62,.11) !important;
-  box-shadow: inset 2px 2px 4px rgba(255,255,255,.95), 0 7px 15px rgba(0,0,0,.055) !important;
-}
-.hero-sphere-a { animation: heroSphereAV5 7s ease-in-out infinite !important; }
-.hero-sphere-b { animation: heroSphereBV5 8.5s ease-in-out infinite !important; }
-.hero-sphere-c { animation: heroSphereCV5 7.6s ease-in-out infinite !important; }
-
-/* Keep the metric label factual without making the motion compete with it. */
-.metrics .metric-card:nth-child(3) strong { font-size: 0 !important; }
-.metrics .metric-card:nth-child(3) strong::after {
-  content: "ARK" !important;
-  font-size: 24px !important;
-  letter-spacing: -.04em !important;
-  font-weight: 650 !important;
-}
-
-@keyframes heroBreathV5 {
-  0%,100% { transform: scale(.96); opacity: .38; }
-  50% { transform: scale(1.04); opacity: .60; }
-}
-@keyframes heroCoreV5 {
-  0%,100% { transform: translateZ(24px) rotateX(4deg) rotateY(-7deg) translateY(0); }
-  50% { transform: translateZ(24px) rotateX(6deg) rotateY(-10deg) translateY(-5px); }
-}
-@keyframes heroOrbitAV5 {
-  from { transform: rotateX(68deg) rotateZ(12deg) rotate(0deg); }
-  to { transform: rotateX(68deg) rotateZ(12deg) rotate(360deg); }
-}
-@keyframes heroOrbitBV5 {
-  from { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(0deg); }
-  to { transform: rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(-360deg); }
-}
-@keyframes heroOrbitCV5 {
-  from { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(0deg); }
-  to { transform: rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(360deg); }
-}
-@keyframes heroSphereAV5 {
-  0%,100% { transform: translate(182px,-56px) scale(1); }
-  50% { transform: translate(132px,70px) scale(1.08); }
-}
-@keyframes heroSphereBV5 {
-  0%,100% { transform: translate(-164px,42px) scale(.94); }
-  50% { transform: translate(-82px,-70px) scale(1.06); }
-}
-@keyframes heroSphereCV5 {
-  0%,100% { transform: translate(110px,86px) scale(.90); }
-  50% { transform: translate(-110px,-22px) scale(1.04); }
-}
-
-@media (max-width: 1180px) {
-  .hero-visual {
-    width: 100% !important;
-    height: 290px !important;
-    right: auto !important;
-    top: -18px !important;
-  }
-}
-@media (max-width: 900px) {
-  .hero-row { min-height: 400px !important; }
-  .hero-visual {
-    width: 100% !important;
-    height: 250px !important;
-    margin: 8px 0 -4px !important;
-    opacity: .30 !important;
-  }
-  .hero-core { transform: scale(.80) translateZ(18px) rotateX(4deg) rotateY(-7deg) !important; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-glow,.hero-core,.hero-orbit,.hero-sphere { animation: none !important; }
-  .hero-core { transform: none !important; }
-}
+/* WineTime hero motion — V6: true ambient background, large enough to occupy the hero without becoming UI. */
+.hero-row { position:relative!important; min-height:300px!important; overflow:hidden!important; isolation:isolate!important; }
+.hero-copy-block,.hero-actions { position:relative!important; z-index:3!important; }
+.hero-visual { width:760px!important; height:410px!important; right:-20px!important; top:-72px!important; overflow:visible!important; z-index:0!important; opacity:.68!important; transform:translateZ(0)!important; filter:blur(.12px) drop-shadow(0 28px 55px rgba(0,0,0,.035))!important; }
+.hero-glow { width:460px!important; height:460px!important; background:radial-gradient(circle,rgba(255,255,255,.98) 0%,rgba(224,224,221,.40) 35%,rgba(255,255,255,0) 73%)!important; filter:blur(12px)!important; animation:heroBreathV6 8s ease-in-out infinite!important; }
+.hero-core { width:225px!important; height:245px!important; border-radius:0!important; background:transparent!important; border:0!important; box-shadow:none!important; transform-style:preserve-3d!important; transform:translateZ(24px) rotateX(4deg) rotateY(-7deg)!important; animation:heroCoreV6 9s ease-in-out infinite!important; }
+.hero-core:before { content:""!important; position:absolute!important; left:50%!important; bottom:-18px!important; width:245px!important; height:38px!important; transform:translateX(-50%) perspective(180px) rotateX(55deg)!important; border-radius:50%!important; background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(218,218,215,.12))!important; border:1px solid rgba(70,70,67,.10)!important; box-shadow:0 12px 28px rgba(0,0,0,.045),inset 0 1px 0 rgba(255,255,255,.9)!important; }
+.hero-core:after { display:none!important; content:none!important; }
+.hero-core span { position:absolute!important; inset:0!important; display:grid!important; place-items:center!important; color:rgba(255,255,255,.62)!important; font-size:178px!important; line-height:.82!important; font-weight:300!important; letter-spacing:-.18em!important; transform:translateX(-5px) translateY(-6px) scaleX(.9)!important; -webkit-text-stroke:1.15px rgba(55,55,52,.18)!important; text-shadow:0 1px 0 rgba(255,255,255,.98),2px 4px 0 rgba(210,210,207,.27),8px 16px 28px rgba(0,0,0,.06)!important; }
+.hero-orbit { width:570px!important; height:230px!important; border-width:1.2px!important; border-color:rgba(80,80,77,.20)!important; opacity:.82!important; box-shadow:inset 0 0 32px rgba(255,255,255,.95),0 18px 40px rgba(0,0,0,.03)!important; }
+.hero-orbit-a { animation:heroOrbitAV6 14s linear infinite!important; }
+.hero-orbit-b { width:480px!important; height:198px!important; border-color:rgba(85,85,82,.17)!important; animation:heroOrbitBV6 18s linear infinite reverse!important; }
+.hero-orbit-c { width:405px!important; height:164px!important; border-color:rgba(95,95,92,.14)!important; animation:heroOrbitCV6 12s linear infinite!important; }
+.hero-sphere { width:13px!important; height:13px!important; background:radial-gradient(circle at 30% 25%,#fff 0%,#e1e1de 52%,#b4b3af 100%)!important; border:1px solid rgba(65,65,62,.13)!important; box-shadow:inset 2px 2px 4px rgba(255,255,255,.97),0 8px 17px rgba(0,0,0,.06)!important; }
+.hero-sphere-a{animation:heroSphereAV6 7s ease-in-out infinite!important}.hero-sphere-b{animation:heroSphereBV6 8.5s ease-in-out infinite!important}.hero-sphere-c{animation:heroSphereCV6 7.6s ease-in-out infinite!important}
+.metrics .metric-card:nth-child(3) strong{font-size:0!important}.metrics .metric-card:nth-child(3) strong:after{content:"ARK"!important;font-size:24px!important;letter-spacing:-.04em!important;font-weight:650!important}
+@keyframes heroBreathV6{0%,100%{transform:scale(.96);opacity:.46}50%{transform:scale(1.06);opacity:.72}}
+@keyframes heroCoreV6{0%,100%{transform:translateZ(24px) rotateX(4deg) rotateY(-7deg) translateY(0)}50%{transform:translateZ(24px) rotateX(6deg) rotateY(-10deg) translateY(-7px)}}
+@keyframes heroOrbitAV6{from{transform:rotateX(68deg) rotateZ(12deg) rotate(0deg)}to{transform:rotateX(68deg) rotateZ(12deg) rotate(360deg)}}
+@keyframes heroOrbitBV6{from{transform:rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(0deg)}to{transform:rotateX(68deg) rotateY(58deg) rotateZ(-20deg) rotate(-360deg)}}
+@keyframes heroOrbitCV6{from{transform:rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(0deg)}to{transform:rotateX(68deg) rotateY(-55deg) rotateZ(28deg) rotate(360deg)}}
+@keyframes heroSphereAV6{0%,100%{transform:translate(255px,-78px) scale(1)}50%{transform:translate(182px,92px) scale(1.1)}}
+@keyframes heroSphereBV6{0%,100%{transform:translate(-220px,54px) scale(.94)}50%{transform:translate(-110px,-86px) scale(1.08)}}
+@keyframes heroSphereCV6{0%,100%{transform:translate(150px,108px) scale(.9)}50%{transform:translate(-145px,-28px) scale(1.05)}}
+@media(max-width:1180px){.hero-visual{width:680px!important;height:360px!important;right:-80px!important;top:-52px!important}}
+@media(max-width:900px){.hero-row{min-height:390px!important}.hero-visual{width:620px!important;height:310px!important;right:50%!important;top:75px!important;transform:translateX(50%) scale(.78)!important;opacity:.52!important}.hero-core{transform:scale(.8) translateZ(18px) rotateX(4deg) rotateY(-7deg)!important}}
+@media(max-width:600px){.hero-row{min-height:365px!important}.hero-visual{top:92px!important;transform:translateX(50%) scale(.64)!important;opacity:.46!important}}
+@media(prefers-reduced-motion:reduce){.hero-glow,.hero-core,.hero-orbit,.hero-sphere{animation:none!important}.hero-core{transform:none!important}}
