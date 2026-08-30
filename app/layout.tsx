@@ -7,6 +7,7 @@ import "./home-polish.css";
 import "./home-sections.css";
 import "./winetime-reference.css";
 import SubscriptionLink from "./subscription-link";
+import HomeLiveMetrics from "./home-live-metrics";
 
 export const metadata: Metadata = {
   title: "WineTime — Business automation",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="fr">
       <body>
         {children}
+        <HomeLiveMetrics />
         <SubscriptionLink />
       </body>
     </html>
