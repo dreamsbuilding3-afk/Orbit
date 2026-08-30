@@ -19,14 +19,18 @@
   .sidebar .nav-item svg { width:18px;height:18px; }
   .content { width:100%; margin-left:0; }
   .topbar { height:58px; padding:0 16px; position:sticky; top:0; z-index:20; }
-  .page { max-width:none; padding:28px 16px 42px; }
-  .hero-row { display:block; margin-bottom:22px; }
+  .page { max-width:none; padding:24px 16px 42px; }
+
+  /* Mobile hero: keep the 3D motion as a background layer, not a layout block. */
+  .hero-row { position:relative; display:block; margin-bottom:18px; padding-bottom:0; }
   .hero-row h1 { font-size:clamp(30px,9vw,38px); }
   .hero-copy { font-size:12px; line-height:1.55; }
-  .hero-row .primary-button { width:100%; justify-content:center; margin-top:18px; min-height:46px; }
-  .hero-visual { position:relative; right:auto; top:auto; width:min(100%,370px); height:235px; margin:8px auto -4px; transform:scale(.82); transform-origin:center; }
-  .hero-actions { align-items:stretch; }
+  .hero-row .hero-copy-block { position:relative; z-index:4; }
+  .hero-visual { position:absolute; right:-18px; top:-18px; width:330px; height:220px; margin:0; transform:scale(.72); transform-origin:top right; z-index:1; pointer-events:none; opacity:.72; }
+  .hero-actions { position:relative; z-index:5; margin-top:16px; gap:7px; }
+  .hero-row .primary-button { width:100%; justify-content:center; margin-top:0; min-height:46px; }
   .secondary-hero-button { justify-content:center; }
+
   .intel-strip { display:block; padding:18px; margin-bottom:12px; }
   .intel-strip h2 { font-size:20px; }
   .intel-strip p:not(.eyebrow) { font-size:10px; }
@@ -53,6 +57,18 @@
   button,a { -webkit-tap-highlight-color:transparent; }
   input,textarea,select { max-width:100%; font-size:16px !important; }
   table,pre,code { max-width:100%; overflow-x:auto; }
+
+  /* Keep Rewards visible above the bottom navigation on phones. */
+  a[aria-label="Voir votre progression WineTime Rewards"] {
+    width:198px !important;
+    right:10px !important;
+    top:70px !important;
+    bottom:auto !important;
+    padding:10px 11px !important;
+    border-radius:14px !important;
+    transform:perspective(900px) rotateX(3deg) rotateY(-4deg) !important;
+    z-index:45 !important;
+  }
 }
 
 /* Keep the existing builder/mobile rules below unchanged in the original file. */
