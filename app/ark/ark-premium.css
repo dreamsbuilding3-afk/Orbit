@@ -1,0 +1,66 @@
+/* WineTime ARK — premium glass system for Recommendations & Permissions */
+.ark-shell,
+.ark-opportunities-page{
+  background:
+    radial-gradient(circle at 78% 8%, rgba(165,205,255,.20), transparent 28%),
+    radial-gradient(circle at 22% 22%, rgba(214,231,255,.18), transparent 30%),
+    linear-gradient(135deg,#f7fbff 0%,#ffffff 46%,#f2f7ff 100%);
+}
+.ark-topbar,
+.ark-opportunities-top{
+  background:rgba(255,255,255,.58)!important;
+  border-color:rgba(84,135,205,.12)!important;
+  box-shadow:0 10px 35px rgba(33,83,145,.05), inset 0 1px 0 rgba(255,255,255,.96);
+}
+.ark-brand strong,.ark-opportunities-brand strong{color:#58739a!important}
+.ark-nav a.active,.ark-opportunities-top nav .active{color:#174995!important}
+.ark-state,
+.notice,
+.brief-card,
+.journey-card,
+.memory-list,
+.run-list,
+.opportunity-list{
+  border-color:rgba(76,128,201,.14)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(239,247,255,.48))!important;
+  box-shadow:0 24px 70px rgba(41,90,151,.08), inset 0 1px 0 rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(22px);
+}
+.metric-focus,
+.metric{
+  border-color:rgba(76,128,201,.13)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(238,246,255,.48))!important;
+  box-shadow:0 24px 65px rgba(41,90,151,.07), inset 0 1px 0 rgba(255,255,255,.98)!important;
+}
+.brief-section .section-head h2,
+.section-title h2{color:#142c52}
+.brief-button{
+  background:linear-gradient(135deg,#0a3b91,#155bd0 58%,#4f9bf1)!important;
+  border:1px solid rgba(9,55,135,.55)!important;
+  box-shadow:0 12px 28px rgba(16,70,157,.22), inset 0 1px 0 rgba(255,255,255,.28)!important;
+}
+.rec-row,
+.perm-row{
+  background:linear-gradient(110deg,rgba(255,255,255,.42),rgba(240,247,255,.34))!important;
+  border-color:rgba(76,128,201,.10)!important;
+}
+.rec-row:hover,
+.perm-row:hover{background:linear-gradient(110deg,rgba(255,255,255,.78),rgba(231,242,255,.54))!important}
+.memory-cat{color:#5d7eaf!important}
+.rec-main h3,.perm-row strong{color:#142e55}
+.rec-main p,.perm-row small{color:#7185a5!important}
+.perm-row select{
+  border-color:rgba(62,111,177,.18)!important;
+  background:rgba(255,255,255,.68)!important;
+  color:#25466f!important;
+  box-shadow:0 9px 24px rgba(34,81,143,.06), inset 0 1px 0 rgba(255,255,255,.95)!important;
+  backdrop-filter:blur(12px);
+}
+.run-status.completed{color:#1655b4!important}
+.ark-state span{background:#155bd0!important;box-shadow:0 0 0 4px rgba(21,91,208,.10)!important}
+@media(max-width:700px){
+  .ark-shell{background:linear-gradient(160deg,#f7fbff 0%,#fff 55%,#f2f7ff 100%)}
+  .ark-page{padding-top:28px!important}
+  .brief-section{margin-top:28px!important}
+  .rec-row,.perm-row{border-radius:16px!important;margin-bottom:8px!important;border:1px solid rgba(76,128,201,.11)!important}
+}
