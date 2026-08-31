@@ -9,7 +9,7 @@
 @media (max-width: 760px) {
   html { -webkit-text-size-adjust: 100%; }
   body { overflow-x: hidden; }
-  .app-shell { display:block; min-height:100svh; padding-bottom:76px; }
+  .app-shell { display:block; min-height:100svh; padding-bottom:28px; }
   .sidebar { position:fixed; left:0; right:0; bottom:0; top:auto; width:100%; min-height:0; height:70px; padding:7px 8px max(7px,env(safe-area-inset-bottom)); display:block; background:rgba(255,255,255,.94); border-right:0; border-top:1px solid var(--line); box-shadow:0 -10px 35px rgba(0,0,0,.07); backdrop-filter:blur(25px); z-index:50; }
   .sidebar .brand,.sidebar .workspace,.sidebar .sidebar-bottom { display:none; }
   .sidebar .nav { margin:0; height:100%; display:flex; align-items:stretch; gap:3px; overflow-x:auto; scrollbar-width:none; }
@@ -22,14 +22,15 @@
   .page { max-width:none; padding:24px 16px 42px; }
 
   /* Mobile hero: keep the 3D motion as a background layer, not a layout block. */
-  .hero-row { position:relative; display:block; margin-bottom:18px; padding-bottom:0; }
+  .hero-row { position:relative; display:block; margin-bottom:2px !important; padding-bottom:0 !important; }
   .hero-row h1 { font-size:clamp(30px,9vw,38px); }
   .hero-copy { font-size:12px; line-height:1.55; }
   .hero-row .hero-copy-block { position:relative; z-index:4; }
   .hero-visual { position:absolute; right:-18px; top:-18px; width:330px; height:220px; margin:0; transform:scale(.72); transform-origin:top right; z-index:1; pointer-events:none; opacity:.72; }
-  .hero-actions { position:relative; z-index:5; margin-top:16px; gap:7px; }
+  .hero-actions { position:relative; z-index:5; margin-top:10px !important; margin-bottom:0 !important; gap:4px !important; }
   .hero-row .primary-button { width:100%; justify-content:center; margin-top:0; min-height:46px; }
   .secondary-hero-button { justify-content:center; }
+  .start-card { margin-top:0 !important; }
 
   .intel-strip { display:block; padding:18px; margin-bottom:12px; }
   .intel-strip h2 { font-size:20px; }
