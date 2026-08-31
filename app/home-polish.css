@@ -5,22 +5,24 @@
 .start-steps{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.start-step{min-height:158px;display:flex;flex-direction:column;align-items:flex-start;padding:15px;border:1px solid rgba(0,0,0,.055);border-radius:14px;background:rgba(255,255,255,.58);box-shadow:inset 0 1px 0 rgba(255,255,255,.95);text-decoration:none;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}.start-step:hover{transform:translateY(-2px);background:rgba(255,255,255,.84);box-shadow:0 14px 30px rgba(0,0,0,.055)}.step-number{color:#aaa;font-size:9px;letter-spacing:.12em;font-weight:700}.start-step strong{display:block;margin-top:27px;font-size:11px;line-height:1.25;font-weight:600;letter-spacing:-.015em}.start-step p{margin:6px 0 0;color:#999;font-size:9px;line-height:1.5}.start-step>svg{margin-top:auto;align-self:flex-end;color:#999}
 @media(max-width:1050px){.start-card{grid-template-columns:1fr!important;gap:18px!important}.start-intro h2,.start-intro>p:last-child{max-width:600px}}
 @media(max-width:700px){
-  .hero-row{margin-bottom:4px!important}
-  .hero-actions{margin-top:8px!important;gap:4px!important}
+  .hero-row{margin-bottom:0!important}
+  .hero-actions{margin-top:5px!important;gap:2px!important}
+  .hero-row .primary-button{min-height:44px!important;height:44px!important}
   .secondary-hero-button{
     margin:0!important;
-    min-height:34px!important;
-    height:34px!important;
-    padding:0 13px!important;
+    min-height:31px!important;
+    height:31px!important;
+    padding:0 12px!important;
     border:1px solid rgba(0,0,0,.075)!important;
     border-radius:11px!important;
-    background:rgba(255,255,255,.72)!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 5px 14px rgba(0,0,0,.03)!important;
+    background:rgba(255,255,255,.74)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 4px 12px rgba(0,0,0,.028)!important;
   }
-  .start-card{grid-template-columns:1fr!important;gap:12px!important;margin-top:0!important;padding:21px!important}
+  .start-card{grid-template-columns:1fr!important;gap:9px!important;margin-top:0!important;padding:18px!important}
   .start-intro{padding:0!important}
-  .start-intro>p:last-child{margin-top:7px!important}
-  .start-steps{gap:7px!important}
-  .start-step{min-height:116px!important;padding:13px!important;border-radius:13px!important}
-  .start-step strong{margin-top:12px!important}
+  .start-intro>p:last-child{margin-top:5px!important}
+  .start-steps{gap:6px!important}
+  .start-step{min-height:108px!important;padding:12px!important;border-radius:12px!important}
+  .start-step strong{margin-top:9px!important}
+  .start-step p{margin-top:4px!important;line-height:1.4!important}
 }
