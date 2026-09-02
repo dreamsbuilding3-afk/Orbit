@@ -99,6 +99,7 @@ export default function ActivityPage() {
         supabase
           .from("workflow_runs")
           .select("id, status, started_at, finished_at, error_message")
+          .eq("organization_id", organizationId)
           .order("started_at", { ascending: false })
           .limit(30),
       ]);
@@ -155,6 +156,41 @@ export default function ActivityPage() {
 
   useEffect(() => {
     void loadActivity();
+    if (!supabase) return;
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    async function subscribeToWorkspace() {
+      const { data: authData } = await supabase!.auth.getUser();
+      const user = authData.user;
+      if (!user || cancelled) return;
+
+      const { data: memberships } = await supabase!
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .limit(1);
+      const organizationId = memberships?.[0]?.organization_id;
+      if (!organizationId || cancelled) return;
+
+      const refresh = () => void loadActivity();
+      channel = supabase!
+        .channel(`activity-live-${organizationId}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "audit_logs", filter: `organization_id=eq.${organizationId}` }, refresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "ark_action_runs", filter: `organization_id=eq.${organizationId}` }, refresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "workflow_runs", filter: `organization_id=eq.${organizationId}` }, refresh)
+        .subscribe();
+    }
+
+    void subscribeToWorkspace();
+
+    const fallbackRefresh = window.setInterval(() => void loadActivity(), 60000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(fallbackRefresh);
+      if (channel) void supabase!.removeChannel(channel);
+    };
   }, [loadActivity]);
 
   const summary = useMemo(() => {
