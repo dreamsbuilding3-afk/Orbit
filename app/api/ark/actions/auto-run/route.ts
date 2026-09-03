@@ -118,8 +118,14 @@ export async function POST(request: Request) {
       queued += 1;
     }
 
+    if (!runId) {
+      failed += 1;
+      continue;
+    }
+    const actionRunId = runId;
+
     if (!actionType.toLowerCase().includes("email") && actionType !== "gmail.send") {
-      await updateActionRun(admin, runId, organizationId, {
+      await updateActionRun(admin, actionRunId, organizationId, {
         status: "cancelled",
         error_message: `Unsupported automatic action type: ${actionType}.`,
         finished_at: new Date().toISOString(),
@@ -140,7 +146,7 @@ export async function POST(request: Request) {
     const connectionActive = connection?.status === "active" || connection?.status === "connected";
     if (connectionError || !connectionActive || typeof encryptedRefreshToken !== "string" || !encryptedRefreshToken) {
       const errorText = "Gmail connection is not active or no server-side Google refresh token is available.";
-      await updateActionRun(admin, runId, organizationId, {
+      await updateActionRun(admin, actionRunId, organizationId, {
         status: "failed",
         error_message: errorText,
         finished_at: new Date().toISOString(),
@@ -154,7 +160,7 @@ export async function POST(request: Request) {
     const subject = String(action.subject ?? "ORBIT message");
     const message = String(action.body ?? action.message ?? "");
     if (!to) {
-      await updateActionRun(admin, runId, organizationId, {
+      await updateActionRun(admin, actionRunId, organizationId, {
         status: "failed",
         error_message: "Gmail action is missing a recipient.",
         finished_at: new Date().toISOString(),
@@ -163,7 +169,7 @@ export async function POST(request: Request) {
       continue;
     }
 
-    await updateActionRun(admin, runId, organizationId, {
+    await updateActionRun(admin, actionRunId, organizationId, {
       status: "executing",
       error_message: null,
       started_at: new Date().toISOString(),
@@ -192,7 +198,7 @@ export async function POST(request: Request) {
       }
 
       const output = await response.json().catch(() => ({}));
-      await updateActionRun(admin, runId, organizationId, {
+      await updateActionRun(admin, actionRunId, organizationId, {
         status: "completed",
         output,
         error_message: null,
@@ -202,7 +208,7 @@ export async function POST(request: Request) {
       executed += 1;
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Automatic execution failed.";
-      await updateActionRun(admin, runId, organizationId, {
+      await updateActionRun(admin, actionRunId, organizationId, {
         status: "failed",
         error_message: errorText,
         finished_at: new Date().toISOString(),
