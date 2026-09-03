@@ -6,6 +6,11 @@ function base64Url(value: string) {
   return Buffer.from(value, "utf8").toString("base64url");
 }
 
+async function updateActionRun(admin: any, id: string, organizationId: string, values: Record<string, unknown>) {
+  const { error } = await admin.from("ark_action_runs").update(values).eq("id", id).eq("organization_id", organizationId);
+  return error;
+}
+
 export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -23,7 +28,7 @@ export async function POST(request: Request) {
   const { data: recommendations, error: recommendationError } = await admin
     .from("ark_recommendations")
     .select("id,organization_id,opportunity_id,action,status")
-    .in("status", ["pending", "queued"])
+    .in("status", ["pending", "approved"])
     .limit(100);
 
   if (recommendationError) return NextResponse.json({ error: recommendationError.message }, { status: 500 });
@@ -78,7 +83,8 @@ export async function POST(request: Request) {
       .from("ark_action_runs")
       .select("id,status")
       .eq("recommendation_id", recommendation.id)
-      .in("status", ["queued", "running", "completed"])
+      .in("status", ["pending", "approved", "executing", "completed"])
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -94,7 +100,7 @@ export async function POST(request: Request) {
         recommendation_id: recommendation.id,
         opportunity_id: recommendation.opportunity_id,
         action_type: actionType,
-        status: "queued",
+        status: "pending",
         input: action,
       }).select("id").single();
 
@@ -107,21 +113,33 @@ export async function POST(request: Request) {
     }
 
     if (!actionType.toLowerCase().includes("email") && actionType !== "gmail.send") {
+      await updateActionRun(admin, runId, recommendation.organization_id, {
+        status: "cancelled",
+        error_message: `Unsupported automatic action type: ${actionType}.`,
+        finished_at: new Date().toISOString(),
+      });
       skipped += 1;
       continue;
     }
 
     const { data: connection, error: connectionError } = await admin
       .from("integration_connections")
-      .select("metadata,status")
+      .select("metadata,status,refresh_token_encrypted")
       .eq("organization_id", recommendation.organization_id)
       .eq("provider", "gmail")
       .maybeSingle();
 
-    const encryptedRefreshToken = (connection?.metadata as Record<string, unknown> | null)?.google_refresh_token_encrypted;
-    if (connectionError || connection?.status !== "connected" || typeof encryptedRefreshToken !== "string") {
-      await admin.from("ark_action_runs").update({ status: "failed", error: "Gmail is connected but no server-side Google refresh token is available." }).eq("id", runId).eq("organization_id", recommendation.organization_id);
-      await admin.from("ark_recommendations").update({ status: "failed" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
+    const metadata = (connection?.metadata as Record<string, unknown> | null) ?? {};
+    const encryptedRefreshToken = connection?.refresh_token_encrypted ?? metadata.google_refresh_token_encrypted;
+    const connectionActive = connection?.status === "active" || connection?.status === "connected";
+    if (connectionError || !connectionActive || typeof encryptedRefreshToken !== "string" || !encryptedRefreshToken) {
+      const errorText = "Gmail connection is not active or no server-side Google refresh token is available.";
+      await updateActionRun(admin, runId, recommendation.organization_id, {
+        status: "failed",
+        error_message: errorText,
+        finished_at: new Date().toISOString(),
+      });
+      await admin.from("ark_recommendations").update({ status: "pending" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
       failed += 1;
       continue;
     }
@@ -130,13 +148,20 @@ export async function POST(request: Request) {
     const subject = String(action.subject ?? "ORBIT message");
     const message = String(action.body ?? action.message ?? "");
     if (!to) {
-      await admin.from("ark_action_runs").update({ status: "failed", error: "Gmail action is missing a recipient." }).eq("id", runId).eq("organization_id", recommendation.organization_id);
-      await admin.from("ark_recommendations").update({ status: "failed" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
+      await updateActionRun(admin, runId, recommendation.organization_id, {
+        status: "failed",
+        error_message: "Gmail action is missing a recipient.",
+        finished_at: new Date().toISOString(),
+      });
       failed += 1;
       continue;
     }
 
-    await admin.from("ark_action_runs").update({ status: "running", error: null }).eq("id", runId).eq("organization_id", recommendation.organization_id);
+    await updateActionRun(admin, runId, recommendation.organization_id, {
+      status: "executing",
+      error_message: null,
+      started_at: new Date().toISOString(),
+    });
 
     try {
       const accessToken = await getGoogleAccessToken(encryptedRefreshToken);
@@ -161,13 +186,22 @@ export async function POST(request: Request) {
       }
 
       const output = await response.json().catch(() => ({}));
-      await admin.from("ark_action_runs").update({ status: "completed", output, error: null }).eq("id", runId).eq("organization_id", recommendation.organization_id);
+      await updateActionRun(admin, runId, recommendation.organization_id, {
+        status: "completed",
+        output,
+        error_message: null,
+        finished_at: new Date().toISOString(),
+      });
       await admin.from("ark_recommendations").update({ status: "executed" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
       executed += 1;
     } catch (error) {
       const errorText = error instanceof Error ? error.message : "Automatic execution failed.";
-      await admin.from("ark_action_runs").update({ status: "failed", error: errorText }).eq("id", runId).eq("organization_id", recommendation.organization_id);
-      await admin.from("ark_recommendations").update({ status: "failed" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
+      await updateActionRun(admin, runId, recommendation.organization_id, {
+        status: "failed",
+        error_message: errorText,
+        finished_at: new Date().toISOString(),
+      });
+      await admin.from("ark_recommendations").update({ status: "pending" }).eq("id", recommendation.id).eq("organization_id", recommendation.organization_id);
       failed += 1;
     }
   }
